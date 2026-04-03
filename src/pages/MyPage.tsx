@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/services/authService';
 import { districtRankings } from '@/mocks/rankings';
 import { formatTemp } from '@/lib/temperature';
@@ -9,7 +10,10 @@ import { toast } from 'sonner';
 
 const MyPage = () => {
   const navigate = useNavigate();
-  const user = authService.getCurrentUser();
+  const user = useAuthStore(state => state.user);
+  
+  if (!user) return null;
+  
   const districtData = districtRankings.find(d => d.district === user.district);
 
   const handleLogout = async () => {

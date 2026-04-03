@@ -6,7 +6,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import FloatingActionButton from '@/components/common/FloatingActionButton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { rankingService } from '@/services/rankingService';
-import { authService } from '@/services/authService';
+import { useAuthStore } from '@/store/useAuthStore';
 import { DistrictRanking, PersonalRanking } from '@/types';
 import { formatTemp } from '@/lib/temperature';
 import { cn } from '@/lib/utils';
@@ -17,8 +17,10 @@ const RankingPage = () => {
   const [districts, setDistricts] = useState<DistrictRanking[]>([]);
   const [personal, setPersonal] = useState<PersonalRanking[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = authService.getCurrentUser();
+  const user = useAuthStore(state => state.user);
   const navigate = useNavigate();
+
+  if (!user) return null;
 
   useEffect(() => {
     setLoading(true);

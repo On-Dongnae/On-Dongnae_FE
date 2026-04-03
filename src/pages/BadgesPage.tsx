@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { profileService } from '@/services/profileService';
-import { authService } from '@/services/authService';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Badge } from '@/types';
 import { formatTemp } from '@/lib/temperature';
 import { cn } from '@/lib/utils';
 
 const BadgesPage = () => {
+  const user = useAuthStore(state => state.user);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = authService.getCurrentUser();
+
+  if (!user) return null;
 
   useEffect(() => {
     profileService.getBadges().then(d => { setBadges(d); setLoading(false); });

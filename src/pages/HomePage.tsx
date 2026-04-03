@@ -3,21 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Users, Map } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
 import logoImg from '@/assets/logo.png';
-import { authService } from '@/services/authService';
+import { useAuthStore } from '@/store/useAuthStore';
 import { weatherService } from '@/services/weatherService';
 import { WeatherInfo, User } from '@/types';
 import { districtRankings } from '@/mocks/rankings';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const user = useAuthStore(state => state.user);
   const [weather, setWeather] = useState<WeatherInfo | null>(null);
 
   useEffect(() => {
-    const u = authService.getCurrentUser();
-    setUser(u);
-    weatherService.getWeather(u.district).then(setWeather);
-  }, []);
+    if (user) {
+      weatherService.getWeather(user.district).then(setWeather);
+    }
+  }, [user]);
 
   if (!user) return null;
 

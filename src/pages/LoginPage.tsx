@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/authService';
+import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 import logoImg from '@/assets/logo.png';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const setAuth = useAuthStore(state => state.setAuth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,13 +21,14 @@ const LoginPage = () => {
     }
     setLoading(true);
     try {
-      const user = await authService.login(email, password);
-      if (user) {
-        toast.success(`${user.nickname}님 환영합니다!`);
-        navigate('/home');
-      }
-    } catch {
-      toast.error('로그인에 실패했습니다.');
+      const { user, token } = await authService.login(email, password);
+      // zustand 스토어 및 localStorage 업데이트
+      setAuth(user, token);
+      
+      toast.success(`${user.nickname}님 환영합니다!`);
+      navigate('/home');
+    } catch (error) {
+      toast.error('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
     } finally {
       setLoading(false);
     }

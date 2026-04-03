@@ -6,13 +6,15 @@ import DistrictTemperatureMap from '@/components/ranking/DistrictTemperatureMap'
 import DistrictLegend from '@/components/ranking/DistrictLegend';
 import DistrictInfoCard from '@/components/ranking/DistrictInfoCard';
 import { mapService, DistrictMapDatum } from '@/services/mapService';
-import { authService } from '@/services/authService';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const RankingMapPage = () => {
+  const user = useAuthStore(state => state.user);
   const [data, setData] = useState<DistrictMapDatum[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = authService.getCurrentUser();
-  const [selected, setSelected] = useState<string>(user.district);
+  const [selected, setSelected] = useState<string>(user?.district || '');
+
+  if (!user) return null;
 
   useEffect(() => {
     mapService.getDistrictMapData().then(d => {

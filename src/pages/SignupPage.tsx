@@ -1,24 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/authService';
+import { regionService, RegionDto } from '@/services/regionService';
 import { toast } from 'sonner';
 import PageHeader from '@/components/common/PageHeader';
 
-const DISTRICTS = [
-  '강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구',
-  '노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구',
-  '성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구',
-];
-
 const SignupPage = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '', passwordConfirm: '', nickname: '', district: '' });
+  const [form, setForm] = useState({ email: '', password: '', passwordConfirm: '', nickname: '', regionId: '' });
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
   const [emailChecked, setEmailChecked] = useState<boolean | null>(null);
   const [nicknameChecked, setNicknameChecked] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  const [regions, setRegions] = useState<RegionDto[]>([]);
+
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        const data = await regionService.getAllRegions();
+        setRegions(data);
+      } catch (err) {
+        toast.error('동네 목록을 불러오는데 실패했습니다.');
+      }
+    };
+    fetchRegions();
+  }, []);
 
   const update = (key: string, value: string) => {
     setForm(p => ({ ...p, [key]: value }));
@@ -41,7 +50,7 @@ const SignupPage = () => {
   };
 
   const handleSignup = async () => {
-    if (!form.email || !form.password || !form.nickname || !form.district) {
+    if (!form.email || !form.password || !form.nickname || !form.regionId) {
       toast.error('모든 항목을 입력해주세요.'); return;
     }
     if (form.password !== form.passwordConfirm) {
@@ -52,11 +61,16 @@ const SignupPage = () => {
     }
     setLoading(true);
     try {
-      await authService.signup(form);
+      await authService.signup({
+        email: form.email,
+        password: form.password,
+        nickname: form.nickname,
+        regionId: Number(form.regionId)
+      });
       toast.success('회원가입이 완료되었습니다!');
       navigate('/');
     } catch {
-      toast.error('회원가입에 실패했습니다.');
+      toast.error('회원가입에 실패했습니다. 형식 또는 중복 여부를 확인해주세요.');
     } finally {
       setLoading(false);
     }
@@ -113,12 +127,12 @@ const SignupPage = () => {
         <div>
           <label className="text-sm font-medium mb-1.5 block">소속 동네</label>
           <select
-            value={form.district}
-            onChange={e => update('district', e.target.value)}
+            value={form.regionId}
+            onChange={e => update('regionId', e.target.value)}
             className="w-full h-11 px-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none"
           >
             <option value="">동네 선택</option>
-            {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+            {regions.map(r => <option key={r.id} value={r.id}>{r.district}</option>)}
           </select>
         </div>
 
