@@ -45,7 +45,7 @@ export const profileService = {
     try {
       // type 필터링이 필요하다면 FE에서 필터링하거나 현재는 점수 내역 전체 표출
       const res = await api.get('/api/rankings/my-score');
-      const history = res.data; // List<ScoreHistoryDto>
+      const history = res.data.data.history; // ApiResponse -> MyScoreResponseDto -> history
       return history.map((h: any) => {
         // ScoreType에 따라 프론트엔드 활동 타입 매핑
         const activityType = h.type === 'MISSION_COMPLETION' || h.type === 'MISSION_VERIFIED' ? 'post' : 'like';

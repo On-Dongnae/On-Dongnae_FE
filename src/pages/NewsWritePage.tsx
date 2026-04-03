@@ -17,38 +17,34 @@ const NewsWritePage = () => {
   const [content, setContent] = useState(editPost ? (editPost.description || editPost.content || '') : '');
   const [location, setLocation] = useState(editPost ? (editPost.location || '') : '');
   const [schedule, setSchedule] = useState(editPost ? (editPost.schedule || '') : '');
-  const [imagePreviews, setImagePreviews] = useState<string[]>(editPost ? (editPost.imageUrls || []) : []);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [existingImages] = useState<string[]>(editPost ? (editPost.imageUrls || []) : []);
+  const [newImages, setNewImages] = useState<{ file: File, preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    if (imageFiles.length + files.length > 3) {
-      toast.error('사진은 최대 3장까지 첨부할 수 있습니다.');
+    if (existingImages.length + newImages.length + files.length > 3) {
+      toast.error('사진은 최대 3장까지 포함할 수 있습니다.');
       return;
     }
 
-    const newFiles = [...imageFiles, ...files];
-    setImageFiles(newFiles);
-
-    const newPreviews = files.map(file => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(newPreviews).then(previews => {
-      setImagePreviews(prev => [...prev, ...previews]);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewImages(prev => [...prev, { file, preview: reader.result as string }]);
+      };
+      reader.readAsDataURL(file);
     });
   };
 
-  const removeImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  const removeNewImage = (idx: number) => {
+    setNewImages(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleExistingImageClick = () => {
+    toast.info('기존 사진은 백엔드 구조상 개별 삭제할 수 없습니다.');
   };
 
   const handleSubmit = async () => {
@@ -56,11 +52,12 @@ const NewsWritePage = () => {
     if (tab === 'gathering' && !title) { toast.error('제목을 입력해주세요.'); return; }
     setLoading(true);
     try {
+      const submitImages = newImages.map(n => n.file);
       if (editPost) {
-        await newsService.updatePost(editPost.id, { type: tab, title, content, location, schedule, images: imageFiles });
+        await newsService.updatePost(editPost.id, { type: tab, title, content, location, schedule, images: submitImages });
         toast.success('글이 수정되었습니다!');
       } else {
-        await newsService.createPost({ type: tab, title, content, location, schedule, images: imageFiles });
+        await newsService.createPost({ type: tab, title, content, location, schedule, images: submitImages });
         toast.success('글이 등록되었습니다!');
       }
       navigate('/news', { state: { refresh: true } });
@@ -114,20 +111,28 @@ const NewsWritePage = () => {
         <div>
           <label className="text-sm font-medium mb-1.5 block">사진 <span className="text-muted-foreground font-normal">(선택, 최대 3장)</span></label>
           <div className="flex flex-col gap-2">
-            {imagePreviews.length > 0 && (
+            {(existingImages.length > 0 || newImages.length > 0) && (
               <div className="flex gap-2 overflow-x-auto pb-2">
-                {imagePreviews.map((preview, index) => (
-                  <div key={index} className="relative rounded-xl overflow-hidden min-w-[124px] w-[124px] h-[124px] border border-border">
-                    <img src={preview} alt={`preview ${index}`} className="w-full h-full object-cover" />
-                    <button onClick={() => removeImage(index)} className="absolute top-1.5 right-1.5 bg-black/60 text-white rounded-full p-1 text-[10px] w-6 h-6 flex items-center justify-center backdrop-blur-sm z-10 transition-colors hover:bg-black/80">✕</button>
+                {existingImages.map((preview, index) => (
+                  <div key={`existing-${index}`} className="relative rounded-xl overflow-hidden min-w-[124px] w-[124px] h-[124px] border border-border group" onClick={handleExistingImageClick}>
+                    <img src={preview} alt="기존 사진" className="w-full h-full object-cover opacity-80" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-white text-[10px] bg-black/50 px-2 py-1 rounded">삭제 불가</span>
+                    </div>
+                  </div>
+                ))}
+                {newImages.map((item, index) => (
+                  <div key={`new-${index}`} className="relative rounded-xl overflow-hidden min-w-[124px] w-[124px] h-[124px] border border-border">
+                    <img src={item.preview} alt={`새 사진 ${index}`} className="w-full h-full object-cover" />
+                    <button onClick={() => removeNewImage(index)} className="absolute top-1.5 right-1.5 bg-black/60 text-white rounded-full p-1 text-[10px] w-6 h-6 flex items-center justify-center backdrop-blur-sm z-10 transition-colors hover:bg-black/80">✕</button>
                   </div>
                 ))}
               </div>
             )}
-            {imagePreviews.length < 3 && (
+            {existingImages.length + newImages.length < 3 && (
               <label className="flex items-center justify-center h-24 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer hover:bg-accent/50 transition-colors">
                 <Camera size={22} className="text-muted-foreground mr-2" strokeWidth={1.4} />
-                <span className="text-sm text-muted-foreground">사진 추가 ({imagePreviews.length}/3)</span>
+                <span className="text-sm text-muted-foreground">사진 추가 ({existingImages.length + newImages.length}/3)</span>
                 <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
               </label>
             )}
