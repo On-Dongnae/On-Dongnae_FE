@@ -52,10 +52,10 @@ const HomePage = () => {
               </div>
             </div>
             <div className="h-px bg-border/60 mb-3" />
-            <div className="flex items-end gap-1.5 mb-2.5">
+            <div className="flex items-end gap-1 mb-2.5">
               <span className="text-[28px] font-bold text-primary leading-none">{user.temperature}</span>
-              <span className="text-[13px] text-muted-foreground mb-0.5">°C</span>
-              <span className="text-[11px] text-muted-foreground mb-0.5 ml-1">내 온도</span>
+              <span className="text-[18px] font-bold text-primary mb-0.5">°C</span>
+              <span className="text-[11px] text-muted-foreground mb-0.5 ml-1.5">내 온도</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-background rounded-lg py-2.5 text-center">

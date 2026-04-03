@@ -36,12 +36,12 @@ const MissionPage = () => {
         <TabSwitcher tabs={['일일 미션', '히든 미션']} activeTab={tab} onChange={setTab} />
 
         {loading ? <LoadingSpinner /> : (
-          <div className="px-4 py-2.5 space-y-2.5 animate-fade-in">
+          <div className="px-4 py-2.5 space-y-3 animate-fade-in">
             {tab === 0 ? daily.map(m => (
               <div key={m.id} className="bg-card rounded-xl p-3.5 shadow-card">
                 <div className="flex items-start justify-between mb-1.5">
                   <h3 className="text-[13px] font-semibold">{m.title}</h3>
-                  <span className="text-[13px] font-bold text-primary whitespace-nowrap ml-2">{formatTempDelta(m.points)}</span>
+                  <span className="text-[14px] font-bold text-primary whitespace-nowrap ml-2">{formatTempDelta(m.points)}</span>
                 </div>
                 <p className="text-[11px] text-muted-foreground mb-2.5 leading-relaxed">{m.description}</p>
                 <button
@@ -65,9 +65,8 @@ const MissionPage = () => {
                 <div className="flex items-center gap-1.5 mb-2.5">
                   <span className="text-[10px] text-muted-foreground flex items-center gap-0.5"><Flame size={10} strokeWidth={1.4} />{formatTempDelta(m.points)}</span>
                 </div>
-                <div className="bg-background rounded-lg px-3 py-2 mb-2.5 text-[11px] text-muted-foreground space-y-0.5">
+                <div className="bg-background rounded-lg px-3 py-2 mb-2.5 text-[11px] text-muted-foreground">
                   <p>인증 · {m.verificationMethod}</p>
-                  <p>유형 · {m.activityType}</p>
                 </div>
                 <button
                   onClick={() => navigate(`/mission/verify?id=${m.id}&title=${encodeURIComponent(m.title)}`)}

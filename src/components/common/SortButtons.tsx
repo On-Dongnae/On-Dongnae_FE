@@ -6,13 +6,13 @@ interface SortButtonsProps {
 }
 
 const SortButtons = ({ current, onChange }: SortButtonsProps) => (
-  <div className="flex gap-1.5 px-4 py-1.5">
+  <div className="flex gap-2.5 px-4 py-1.5">
     {(['latest', 'popular'] as const).map(sort => (
       <button
         key={sort}
         onClick={() => onChange(sort)}
         className={cn(
-          'px-2.5 py-[5px] text-[11px] rounded-full transition-colors font-medium',
+          'px-3.5 py-[7px] text-[12px] rounded-full transition-colors font-medium',
           current === sort
             ? 'bg-foreground text-background'
             : 'bg-secondary text-muted-foreground'

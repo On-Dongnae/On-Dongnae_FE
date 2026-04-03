@@ -51,6 +51,24 @@
     --tab-inactive: 20 6% 56%;
     --success: 152 45% 42%;
     --success-foreground: 0 0% 100%;
+
+    /* Admin design tokens */
+    --admin-bg: 40 20% 97%;
+    --admin-sidebar-bg: 30 15% 96%;
+    --admin-sidebar-fg: 20 8% 46%;
+    --admin-sidebar-active: 30 72% 50%;
+    --admin-sidebar-hover: 30 12% 92%;
+    --admin-header-bg: 0 0% 100%;
+    --admin-header-border: 30 12% 90%;
+    --admin-kpi-border: 30 12% 92%;
+    --admin-amber: 38 92% 50%;
+    --admin-amber-light: 40 90% 95%;
+    --admin-green: 152 45% 42%;
+    --admin-green-light: 150 40% 94%;
+    --admin-red: 0 60% 52%;
+    --admin-red-light: 0 50% 95%;
+    --admin-blue: 215 70% 52%;
+    --admin-blue-light: 215 60% 95%;
   }
 }
 

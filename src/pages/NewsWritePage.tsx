@@ -44,7 +44,7 @@ const NewsWritePage = () => {
   return (
     <div className="app-container min-h-screen">
       <PageHeader title="글쓰기" showBack />
-      <div className="px-5 py-4 space-y-4 animate-fade-in">
+      <div className="px-5 py-4 space-y-5 animate-fade-in">
         {/* Type selector */}
         <div className="flex gap-2">
           {(['feed', 'gathering'] as const).map(t => (
@@ -97,7 +97,7 @@ const NewsWritePage = () => {
           )}
         </div>
 
-        <button onClick={handleSubmit} disabled={loading} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60">
+        <button onClick={handleSubmit} disabled={loading} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 mt-2">
           {loading ? '등록 중...' : '등록하기'}
         </button>
       </div>

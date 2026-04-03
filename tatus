@@ -1,0 +1,30 @@
+[33mcommit d311046b1d4519cd9a50e2660d611b87253cf9f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelop[m[33m, [m[1;31morigin/develop[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Yunho Kwak <kyunho8962@gmail.com>
+Date:   Fri Apr 3 20:37:53 2026 +0900
+
+    chore: replace project with new source
+
+src/App.tsx
+src/assets/logo.png
+src/assets/news/plogging.jpg
+src/components/common/FloatingActionButton.tsx
+src/components/ranking/DistrictInfoCard.tsx
+src/components/ranking/DistrictLegend.tsx
+src/components/ranking/DistrictTemperatureMap.tsx
+src/lib/mapColors.ts
+src/lib/temperature.ts
+src/mocks/missions.ts
+src/mocks/news.ts
+src/mocks/rankings.ts
+src/mocks/seoulDistrictMap.ts
+src/mocks/users.ts
+src/pages/ActivityPage.tsx
+src/pages/HomePage.tsx
+src/pages/LoginPage.tsx
+src/pages/MissionPage.tsx
+src/pages/MyPage.tsx
+src/pages/NewsPage.tsx
+src/pages/RankingMapPage.tsx
+src/pages/RankingPage.tsx
+src/pages/SignupPage.tsx
+src/services/mapService.ts

@@ -96,10 +96,11 @@ const NewsPage = () => {
       <div className="pt-3">
         <h1 className="text-[15px] font-bold px-5 mb-2 text-center">소식</h1>
         <TabSwitcher tabs={['활동 기록', '동네 모임']} activeTab={tab} onChange={i => { setTab(i); setSort('latest'); }} />
+        <div className="mt-1.5" />
         <SortButtons current={sort} onChange={setSort} />
 
         {loading ? <LoadingSpinner /> : (
-          <div className="px-4 space-y-2.5 pb-4 animate-fade-in">
+          <div className="px-4 space-y-3.5 pb-4 animate-fade-in">
             {tab === 0 ? feeds.map(f => (
               <div key={f.id} data-post-id={f.id} className={`bg-card rounded-xl shadow-card overflow-hidden transition-all duration-500 ${highlightId === f.id ? 'ring-2 ring-primary/40' : ''}`}>
                 {/* 사진 영역 */}

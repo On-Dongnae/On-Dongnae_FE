@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Camera, Upload, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { Camera, Upload, CheckCircle, AlertCircle, XCircle, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { missionService } from '@/services/missionService';
 import { VerificationResult } from '@/types';
@@ -15,6 +15,7 @@ const MissionVerifyPage = () => {
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
+  const [imageScale, setImageScale] = useState(1);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,9 +64,16 @@ const MissionVerifyPage = () => {
             <div className="mb-4">
               <label className="text-sm font-medium mb-2 block">인증 사진</label>
               {imagePreview ? (
-                <div className="relative rounded-xl overflow-hidden bg-muted">
-                  <img src={imagePreview} alt="preview" className="w-full h-48 object-cover" />
-                  <button onClick={() => setImagePreview(null)} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
+                <div className="space-y-2">
+                  <div className="relative rounded-xl overflow-hidden bg-muted">
+                    <img src={imagePreview} alt="preview" className="w-full h-48 object-cover transition-transform duration-200" style={{ transform: `scale(${imageScale})`, transformOrigin: 'center center' }} />
+                    <button onClick={() => { setImagePreview(null); setImageScale(1); }} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
+                  </div>
+                  <div className="flex items-center justify-center gap-3">
+                    <button onClick={() => setImageScale(s => Math.max(0.5, s - 0.25))} className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground active:bg-secondary/70 transition-colors"><ZoomOut size={16} strokeWidth={1.6} /></button>
+                    <button onClick={() => setImageScale(1)} className="text-[11px] text-muted-foreground font-medium px-2">{Math.round(imageScale * 100)}%</button>
+                    <button onClick={() => setImageScale(s => Math.min(3, s + 0.25))} className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground active:bg-secondary/70 transition-colors"><ZoomIn size={16} strokeWidth={1.6} /></button>
+                  </div>
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer hover:border-primary/30 transition-colors">

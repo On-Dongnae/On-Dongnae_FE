@@ -17,6 +17,14 @@ import RewardsPage from "./pages/RewardsPage";
 import BadgesPage from "./pages/BadgesPage";
 import NotFound from "./pages/NotFound";
 
+// Admin
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminFeedsPage from "./pages/admin/AdminFeedsPage";
+import AdminVerificationsPage from "./pages/admin/AdminVerificationsPage";
+import AdminMissionsPage from "./pages/admin/AdminMissionsPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -25,6 +33,7 @@ const App = () => (
       <Sonner position="top-center" />
       <BrowserRouter>
         <Routes>
+          {/* User-facing routes */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/home" element={<HomePage />} />
@@ -38,6 +47,16 @@ const App = () => (
           <Route path="/mypage/activity" element={<ActivityPage />} />
           <Route path="/mypage/rewards" element={<RewardsPage />} />
           <Route path="/mypage/badges" element={<BadgesPage />} />
+
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="feeds" element={<AdminFeedsPage />} />
+            <Route path="verifications" element={<AdminVerificationsPage />} />
+            <Route path="missions" element={<AdminMissionsPage />} />
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
