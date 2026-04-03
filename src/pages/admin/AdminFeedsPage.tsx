@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import StatusBadge from '@/components/admin/StatusBadge';
-import { adminFeeds } from '@/mocks/admin';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { adminService } from '@/services/adminService';
 import type { AdminFeed } from '@/types/admin';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +17,17 @@ export default function AdminFeedsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'normal' | 'hidden' | 'review'>('all');
   const [selectedFeed, setSelectedFeed] = useState<AdminFeed | null>(null);
-  const [feeds, setFeeds] = useState(adminFeeds);
+  const [feeds, setFeeds] = useState<AdminFeed[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchFeeds = () => {
+    setLoading(true);
+    adminService.getFeeds()
+      .then(setFeeds)
+      .catch(() => toast.error('피드 목록을 불러오는데 실패했습니다.'))
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { fetchFeeds(); }, []);
 
   const filtered = useMemo(() => {
     let result = feeds.filter((f) => f.type === tab);
@@ -32,14 +44,23 @@ export default function AdminFeedsPage() {
     return result;
   }, [feeds, tab, search, statusFilter]);
 
-  const updateStatus = (id: string, status: 'normal' | 'hidden') => {
-    setFeeds((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
+  const handleDeleteFeed = async (id: string) => {
+    if (!window.confirm('정말로 이 게시글을 삭제하시겠습니까? (복구 불가)')) return;
+    try {
+      await adminService.deleteFeed(id);
+      toast.success('게시글이 삭제되었습니다.');
+      fetchFeeds();
+    } catch {
+      toast.error('삭제에 실패했습니다.');
+    }
   };
 
   const feedStatusVariant = (s: string) =>
     s === 'normal' ? 'success' : s === 'hidden' ? 'neutral' : 'warning';
   const feedStatusLabel = (s: string) =>
     s === 'normal' ? '정상' : s === 'hidden' ? '숨김' : '검토 필요';
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -123,21 +144,12 @@ export default function AdminFeedsPage() {
                     >
                       보기
                     </button>
-                    {feed.status !== 'hidden' ? (
-                      <button
-                        onClick={() => updateStatus(feed.id, 'hidden')}
-                        className="px-2.5 py-1 text-xs rounded bg-admin-red-light text-admin-red hover:bg-admin-red/10 transition-colors"
-                      >
-                        숨김
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => updateStatus(feed.id, 'normal')}
-                        className="px-2.5 py-1 text-xs rounded bg-admin-green-light text-admin-green hover:bg-admin-green/10 transition-colors"
-                      >
-                        복구
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleDeleteFeed(feed.id)}
+                      className="px-2.5 py-1 text-xs rounded bg-admin-red-light text-admin-red hover:bg-admin-red/10 transition-colors"
+                    >
+                      삭제
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -175,21 +187,18 @@ export default function AdminFeedsPage() {
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => {
-                    updateStatus(selectedFeed.id, 'normal');
-                    setSelectedFeed(null);
-                  }}
-                  className="px-3 py-1.5 text-sm rounded bg-admin-green-light text-admin-green hover:bg-admin-green/10 transition-colors"
-                >
-                  정상 처리
-                </button>
-                <button
-                  onClick={() => {
-                    updateStatus(selectedFeed.id, 'hidden');
+                    handleDeleteFeed(selectedFeed.id);
                     setSelectedFeed(null);
                   }}
                   className="px-3 py-1.5 text-sm rounded bg-admin-red-light text-admin-red hover:bg-admin-red/10 transition-colors"
                 >
-                  숨김 처리
+                  삭제
+                </button>
+                <button
+                  onClick={() => setSelectedFeed(null)}
+                  className="px-3 py-1.5 text-sm rounded border border-border text-foreground hover:bg-muted transition-colors"
+                >
+                  닫기
                 </button>
               </div>
             </div>

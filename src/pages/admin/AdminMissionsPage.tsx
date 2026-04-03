@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StatusBadge from '@/components/admin/StatusBadge';
-import { adminMissionPolicies, adminPolicyHistory } from '@/mocks/admin';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { adminService } from '@/services/adminService';
+import { adminPolicyHistory } from '@/mocks/admin';
 import type { AdminMissionPolicy } from '@/types/admin';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -11,10 +14,20 @@ import {
 
 export default function AdminMissionsPage() {
   const [tab, setTab] = useState<'daily' | 'hidden' | 'policy'>('daily');
-  const [missions, setMissions] = useState(adminMissionPolicies);
+  const [missions, setMissions] = useState<AdminMissionPolicy[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<AdminMissionPolicy | null>(null);
   const [editPoints, setEditPoints] = useState(0);
   const [editActive, setEditActive] = useState(true);
+
+  const fetchMissions = () => {
+    setLoading(true);
+    adminService.getMissionPolicies()
+      .then(setMissions)
+      .catch(() => toast.error('미션 목록을 불러오는데 실패했습니다.'))
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { fetchMissions(); }, []);
 
   const dailyMissions = missions.filter((m) => m.type === 'daily');
   const hiddenMissions = missions.filter((m) => m.type === 'hidden');
@@ -25,15 +38,19 @@ export default function AdminMissionsPage() {
     setEditActive(m.isActive);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editing) return;
-    setMissions((prev) =>
-      prev.map((m) =>
-        m.id === editing.id ? { ...m, points: editPoints, isActive: editActive } : m
-      )
-    );
-    setEditing(null);
+    try {
+      await adminService.updateMission(editing.id, { pointAmount: editPoints });
+      toast.success('미션이 수정되었습니다.');
+      setEditing(null);
+      fetchMissions();
+    } catch {
+      toast.error('미션 수정에 실패했습니다.');
+    }
   };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-4 max-w-[1400px]">

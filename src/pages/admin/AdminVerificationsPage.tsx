@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ClipboardCheck, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
 import StatsCard from '@/components/admin/StatsCard';
 import StatusBadge from '@/components/admin/StatusBadge';
-import { adminVerifications } from '@/mocks/admin';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { adminService } from '@/services/adminService';
 import type { AdminVerification } from '@/types/admin';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +17,18 @@ export default function AdminVerificationsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<AdminVerification | null>(null);
-  const [items, setItems] = useState(adminVerifications);
+  const [items, setItems] = useState<AdminVerification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchVerifications = () => {
+    setLoading(true);
+    const apiStatus = statusFilter === 'all' ? 'pending' : statusFilter;
+    adminService.getVerifications(apiStatus)
+      .then(setItems)
+      .catch(() => toast.error('인증 목록을 불러오는데 실패했습니다.'))
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { fetchVerifications(); }, [statusFilter]);
 
   const stats = useMemo(() => {
     const total = items.length;
@@ -45,8 +58,19 @@ export default function AdminVerificationsPage() {
     return result;
   }, [items, statusFilter, search]);
 
-  const updateStatus = (id: string, status: 'approved' | 'rejected' | 'pending') => {
-    setItems((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
+  const updateStatus = async (id: string, status: 'approved' | 'rejected' | 'pending') => {
+    try {
+      if (status === 'approved') {
+        await adminService.approveVerification(id);
+        toast.success('인증이 승인되었습니다.');
+      } else if (status === 'rejected') {
+        await adminService.rejectVerification(id, '관리자 판단에 의한 반려');
+        toast.success('인증이 반려되었습니다.');
+      }
+      fetchVerifications();
+    } catch {
+      toast.error('상태 변경에 실패했습니다.');
+    }
   };
 
   const statusLabel = (s: string) =>
@@ -58,6 +82,8 @@ export default function AdminVerificationsPage() {
     r === 'pass' ? 'AI 통과' : r === 'fail' ? 'AI 실패' : 'AI 불확실';
   const aiVariant = (r: string) =>
     r === 'pass' ? 'success' : r === 'fail' ? 'danger' : 'warning';
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-4 max-w-[1400px]">

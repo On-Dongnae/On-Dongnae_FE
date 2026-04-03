@@ -3,24 +3,28 @@ import { Users, ClipboardCheck, AlertTriangle, FileText, TrendingUp, Thermometer
 import StatsCard from '@/components/admin/StatsCard';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { adminService } from '@/services/adminService';
-import type { AdminDashboardStats } from '@/types/admin';
+import type { AdminDashboardStats, AdminVerification } from '@/types/admin';
 import type { DistrictRanking, PersonalRanking } from '@/types';
-import { adminVerifications } from '@/mocks/admin';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [districtTop, setDistrictTop] = useState<DistrictRanking[]>([]);
   const [personalTop, setPersonalTop] = useState<PersonalRanking[]>([]);
+  const [pendingVerifications, setPendingVerifications] = useState<AdminVerification[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminService.getDashboardStats().then(setStats);
-    adminService.getDistrictRankings().then(setDistrictTop);
-    adminService.getPersonalRankings().then(setPersonalTop);
+    Promise.all([
+      adminService.getDashboardStats().then(setStats),
+      adminService.getDistrictRankings().then(setDistrictTop).catch(() => {}),
+      adminService.getPersonalRankings().then(setPersonalTop).catch(() => {}),
+      adminService.getVerifications('pending').then(setPendingVerifications).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, []);
 
+  if (loading) return <LoadingSpinner />;
   if (!stats) return null;
-
-  const pendingVerifications = adminVerifications.filter((v) => v.status === 'pending');
 
   return (
     <div className="space-y-6 max-w-[1400px]">

@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import StatusBadge from '@/components/admin/StatusBadge';
-import { adminUsers } from '@/mocks/admin';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { adminService } from '@/services/adminService';
 import type { AdminUser } from '@/types/admin';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +17,17 @@ export default function AdminUsersPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
   const [sortBy, setSortBy] = useState<'latest' | 'temperature' | 'total'>('latest');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [users, setUsers] = useState(adminUsers);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUsers = () => {
+    setLoading(true);
+    adminService.getUsers()
+      .then(setUsers)
+      .catch(() => toast.error('유저 목록을 불러오는데 실패했습니다.'))
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { fetchUsers(); }, []);
 
   const filtered = useMemo(() => {
     let result = [...users];
@@ -37,15 +49,22 @@ export default function AdminUsersPage() {
     return result;
   }, [users, search, statusFilter, sortBy]);
 
-  const toggleStatus = (user: AdminUser) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === user.id
-          ? { ...u, status: u.status === 'active' ? 'suspended' as const : 'active' as const }
-          : u
-      )
-    );
+  const toggleStatus = async (user: AdminUser) => {
+    try {
+      if (user.status === 'active') {
+        await adminService.suspendUser(user.id, '관리자 판단에 의한 정지');
+        toast.success(`${user.nickname} 유저가 정지되었습니다.`);
+      } else {
+        await adminService.activateUser(user.id);
+        toast.success(`${user.nickname} 유저가 활성화되었습니다.`);
+      }
+      fetchUsers();
+    } catch {
+      toast.error('상태 변경에 실패했습니다.');
+    }
   };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-4 max-w-[1400px]">
