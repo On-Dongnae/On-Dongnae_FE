@@ -9,8 +9,15 @@ import CommentSheet from '@/components/news/CommentSheet';
 import { newsService } from '@/services/newsService';
 import { commentService } from '@/services/commentService';
 import { FeedPost, GatheringPost, NewsComment } from '@/types';
-import { Heart, MessageCircle, MapPin, Calendar, ImageIcon } from 'lucide-react';
+import { Heart, MessageCircle, MapPin, Calendar, ImageIcon, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import {
   Carousel,
@@ -56,9 +63,11 @@ const ImageCarousel = ({ urls }: { urls: string[] }) => {
 const NewsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { targetPostId, targetTab } = (location.state as { targetPostId?: string; targetTab?: number } || {});
+  const { targetPostId, targetTab, refresh } = (location.state as { targetPostId?: string; targetTab?: number; refresh?: boolean } || {});
   const [tab, setTab] = useState(targetTab ?? 0);
   const [highlightId, setHighlightId] = useState<string | null>(targetPostId ?? null);
+  const user = useAuthStore(state => state.user);
+  const currentUserNickname = user?.email ? user.email.split('@')[0] : '이웃';
   
   const [sort, setSort] = useState<'latest' | 'popular'>('latest');
   const [feeds, setFeeds] = useState<FeedPost[]>([]);
@@ -72,13 +81,17 @@ const NewsPage = () => {
   const [comments, setComments] = useState<NewsComment[]>([]);
 
   useEffect(() => {
+    fetchPosts();
+  }, [tab, sort, refresh]);
+
+  const fetchPosts = () => {
     setLoading(true);
     if (tab === 0) {
       newsService.getFeedPosts(sort).then(d => { setFeeds(d); setLoading(false); });
     } else {
       newsService.getGatheringPosts(sort).then(d => { setGatherings(d); setLoading(false); });
     }
-  }, [tab, sort]);
+  };
 
   useEffect(() => {
     if (!loading && targetPostId) {
@@ -141,6 +154,47 @@ const NewsPage = () => {
     }
   };
 
+  const updateComment = async (id: string, content: string) => {
+    try {
+      await commentService.updateComment(id, content);
+      setComments(prev => prev.map(c => c.id === id ? { ...c, content } : c));
+    } catch {
+      toast.error('댓글 수정에 실패했습니다.');
+    }
+  };
+
+  const deleteComment = async (id: string) => {
+    if (!window.confirm('정말로 댓글을 삭제하시겠습니까?')) return;
+    try {
+      await commentService.deleteComment(id);
+      setComments(prev => prev.filter(c => c.id !== id));
+      
+      // 코멘트 카운트 -1 반영
+      if (tab === 0) {
+        setFeeds(prev => prev.map(f => f.id === commentPostId ? { ...f, comments: Math.max(0, f.comments - 1) } : f));
+      } else {
+        setGatherings(prev => prev.map(g => g.id === commentPostId ? { ...g, comments: Math.max(0, g.comments - 1) } : g));
+      }
+    } catch {
+      toast.error('댓글 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleEditPost = (post: any) => {
+    navigate(`/news/write?type=${tab === 0 ? 'feed' : 'gathering'}`, { state: { editPost: post } });
+  };
+
+  const handleDeletePost = async (id: string) => {
+    if (!window.confirm('정말로 게시글을 삭제하시겠습니까?')) return;
+    try {
+      await newsService.deletePost(id);
+      toast.success('게시글이 삭제되었습니다.');
+      fetchPosts();
+    } catch {
+      toast.error('게시글 삭제에 실패했습니다.');
+    }
+  };
+
   return (
     <AppLayout>
       <div className="pt-3">
@@ -156,14 +210,27 @@ const NewsPage = () => {
               <div key={f.id} data-post-id={f.id} className={`bg-card rounded-xl shadow-card overflow-hidden transition-all duration-500 ${highlightId === f.id ? 'ring-2 ring-primary/40' : ''}`}>
                 <ImageCarousel urls={f.imageUrls} />
                 <div className="p-3.5">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/12 flex items-center justify-center text-[11px] font-bold text-primary">{f.authorNickname[0] || '?'}</div>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium leading-tight">{f.authorNickname}</p>
-                      <p className="text-[10px] text-muted-foreground">{f.authorDistrict} · {f.createdAt}</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-primary/12 flex items-center justify-center text-[11px] font-bold text-primary">{f.authorNickname[0] || '?'}</div>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-medium leading-tight">{f.authorNickname}</p>
+                        <p className="text-[10px] text-muted-foreground">{f.authorDistrict} · {f.createdAt}</p>
+                      </div>
                     </div>
+                    {f.authorNickname === currentUserNickname && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="text-muted-foreground hover:bg-muted p-1.5 rounded-full"><MoreHorizontal size={14} /></button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditPost(f)} className="text-[12px]"><Pencil size={12} className="mr-2" /> <span>수정</span></DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeletePost(f.id)} className="text-[12px] text-destructive focus:text-destructive"><Trash2 size={12} className="mr-2" /> <span>삭제</span></DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
-                  <p className="text-[13px] text-foreground leading-[1.6] mb-3">{f.content}</p>
+                  <p className="text-[13px] text-foreground leading-[1.6] mb-3 whitespace-pre-wrap">{f.content}</p>
                   <div className="flex items-center gap-4">
                     <button onClick={() => toggleLike(f.id, f.liked)} className={`flex items-center gap-1 text-[12px] ${f.liked ? 'text-accent' : 'text-muted-foreground'}`}>
                       <Heart size={14} fill={f.liked ? 'currentColor' : 'none'} strokeWidth={1.5} />{f.likes}
@@ -178,7 +245,20 @@ const NewsPage = () => {
               <div key={g.id} data-post-id={g.id} className={`bg-card rounded-xl shadow-card overflow-hidden transition-all duration-500 ${highlightId === g.id ? 'ring-2 ring-primary/40' : ''}`}>
                 <ImageCarousel urls={g.imageUrls} />
                 <div className="p-3.5">
-                  <h3 className="text-[15px] font-semibold mb-1.5">{g.title}</h3>
+                  <div className="flex items-start justify-between mb-1.5">
+                    <h3 className="text-[15px] font-semibold">{g.title}</h3>
+                    {g.authorNickname === currentUserNickname && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="text-muted-foreground hover:bg-muted p-1.5 rounded-full -mt-1"><MoreHorizontal size={14} /></button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditPost(g)} className="text-[12px]"><Pencil size={12} className="mr-2" /> <span>수정</span></DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeletePost(g.id)} className="text-[12px] text-destructive focus:text-destructive"><Trash2 size={12} className="mr-2" /> <span>삭제</span></DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-6 h-6 rounded-full bg-primary/12 flex items-center justify-center text-[9px] font-bold text-primary">{g.authorNickname[0] || '?'}</div>
                     <span className="text-[11px] text-muted-foreground">{g.authorNickname} · {g.authorDistrict}</span>
@@ -209,6 +289,8 @@ const NewsPage = () => {
           postTitle={commentPostTitle}
           comments={comments}
           onAddComment={addComment}
+          onUpdateComment={updateComment}
+          onDeleteComment={deleteComment}
         />
       </div>
     </AppLayout>

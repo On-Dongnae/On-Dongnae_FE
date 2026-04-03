@@ -49,5 +49,15 @@ export const commentService = {
       content: c.content,
       createdAt: formatDate(c.createdAt)
     };
+  },
+
+  updateComment: async (commentId: string, content: string): Promise<boolean> => {
+    await api.put(`/api/comments/${commentId}`, { content });
+    return true;
+  },
+
+  deleteComment: async (commentId: string): Promise<boolean> => {
+    await api.delete(`/api/comments/${commentId}`);
+    return true;
   }
 };

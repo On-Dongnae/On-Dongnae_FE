@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Camera } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { newsService } from '@/services/newsService';
@@ -9,12 +9,15 @@ const NewsWritePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const type = (searchParams.get('type') || 'feed') as 'feed' | 'gathering';
-  const [tab, setTab] = useState<'feed' | 'gathering'>(type);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [location, setLocation] = useState('');
-  const [schedule, setSchedule] = useState('');
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const locationState = useLocation();
+  const editPost = locationState.state?.editPost;
+  
+  const [tab, setTab] = useState<'feed' | 'gathering'>(editPost ? (editPost.location ? 'gathering' : 'feed') : type);
+  const [title, setTitle] = useState(editPost ? (editPost.title || '') : '');
+  const [content, setContent] = useState(editPost ? (editPost.description || editPost.content || '') : '');
+  const [location, setLocation] = useState(editPost ? (editPost.location || '') : '');
+  const [schedule, setSchedule] = useState(editPost ? (editPost.schedule || '') : '');
+  const [imagePreviews, setImagePreviews] = useState<string[]>(editPost ? (editPost.imageUrls || []) : []);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -53,11 +56,16 @@ const NewsWritePage = () => {
     if (tab === 'gathering' && !title) { toast.error('제목을 입력해주세요.'); return; }
     setLoading(true);
     try {
-      await newsService.createPost({ type: tab, title, content, location, schedule, images: imageFiles });
-      toast.success('글이 등록되었습니다!');
-      navigate('/news');
+      if (editPost) {
+        await newsService.updatePost(editPost.id, { type: tab, title, content, location, schedule, images: imageFiles });
+        toast.success('글이 수정되었습니다!');
+      } else {
+        await newsService.createPost({ type: tab, title, content, location, schedule, images: imageFiles });
+        toast.success('글이 등록되었습니다!');
+      }
+      navigate('/news', { state: { refresh: true } });
     } catch {
-      toast.error('등록에 실패했습니다.');
+      toast.error(editPost ? '수정에 실패했습니다.' : '등록에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -65,7 +73,7 @@ const NewsWritePage = () => {
 
   return (
     <div className="app-container min-h-screen">
-      <PageHeader title="글쓰기" showBack />
+      <PageHeader title={editPost ? '글 수정' : '글쓰기'} showBack />
       <div className="px-5 py-4 space-y-5 animate-fade-in">
         {/* Type selector */}
         <div className="flex gap-2">
@@ -127,7 +135,7 @@ const NewsWritePage = () => {
         </div>
 
         <button onClick={handleSubmit} disabled={loading} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 mt-2">
-          {loading ? '등록 중...' : '등록하기'}
+          {loading ? (editPost ? '수정 중...' : '등록 중...') : (editPost ? '수정하기' : '등록하기')}
         </button>
       </div>
     </div>

@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { NewsComment } from '@/types';
-import { Send } from 'lucide-react';
+import { Send, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CommentSheetProps {
   open: boolean;
@@ -9,15 +16,31 @@ interface CommentSheetProps {
   postTitle: string;
   comments: NewsComment[];
   onAddComment: (content: string) => void;
+  onUpdateComment: (id: string, content: string) => void;
+  onDeleteComment: (id: string) => void;
 }
 
-const CommentSheet = ({ open, onOpenChange, postTitle, comments, onAddComment }: CommentSheetProps) => {
+const CommentSheet = ({ open, onOpenChange, postTitle, comments, onAddComment, onUpdateComment, onDeleteComment }: CommentSheetProps) => {
   const [input, setInput] = useState('');
+  const [editId, setEditId] = useState<string | null>(null);
+  const user = useAuthStore(state => state.user);
+  
+  const currentUserNickname = user?.email ? user.email.split('@')[0] : '이웃';
 
   const handleSubmit = () => {
     if (!input.trim()) return;
-    onAddComment(input.trim());
+    if (editId) {
+      onUpdateComment(editId, input.trim());
+      setEditId(null);
+    } else {
+      onAddComment(input.trim());
+    }
     setInput('');
+  };
+
+  const startEdit = (c: NewsComment) => {
+    setEditId(c.id);
+    setInput(c.content);
   };
 
   return (
@@ -33,16 +56,29 @@ const CommentSheet = ({ open, onOpenChange, postTitle, comments, onAddComment }:
             <p className="text-[12px] text-muted-foreground text-center py-8">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</p>
           ) : (
             comments.map(c => (
-              <div key={c.id} className="flex gap-2.5">
+              <div key={c.id} className={`flex gap-2.5 p-2 rounded-xl transition-colors ${editId === c.id ? 'bg-primary/5' : ''}`}>
                 <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 mt-0.5">
                   {c.authorNickname[0]}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-[12px] font-medium">{c.authorNickname}</span>
-                    <span className="text-[10px] text-muted-foreground">{c.createdAt}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between mb-0.5">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[12px] font-medium">{c.authorNickname}</span>
+                      <span className="text-[10px] text-muted-foreground">{c.createdAt}</span>
+                    </div>
+                    {c.authorNickname === currentUserNickname && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="text-muted-foreground hover:bg-muted p-1 rounded-full"><MoreVertical size={12} /></button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-[100px]">
+                          <DropdownMenuItem onClick={() => startEdit(c)} className="text-[12px]"><Pencil size={12} className="mr-2" /> 수정</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onDeleteComment(c.id)} className="text-[12px] text-destructive focus:text-destructive"><Trash2 size={12} className="mr-2" /> 삭제</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
-                  <p className="text-[12px] text-foreground leading-relaxed mt-0.5">{c.content}</p>
+                  <p className="text-[12px] text-foreground leading-relaxed break-words whitespace-pre-wrap">{c.content}</p>
                 </div>
               </div>
             ))
@@ -50,9 +86,12 @@ const CommentSheet = ({ open, onOpenChange, postTitle, comments, onAddComment }:
         </div>
 
         <div className="border-t border-border px-3 py-2.5 flex items-center gap-2 bg-background">
+          {editId && (
+            <button onClick={() => { setEditId(null); setInput(''); }} className="shrink-0 mr-1 text-xs text-muted-foreground font-medium underline underline-offset-2">취소</button>
+          )}
           <input
-            className="flex-1 h-9 rounded-full bg-muted px-3.5 text-[13px] outline-none placeholder:text-muted-foreground"
-            placeholder="댓글을 입력하세요..."
+            className="flex-1 h-9 rounded-full bg-muted px-3.5 text-[13px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/40 transition-shadow"
+            placeholder={editId ? "댓글 수정 중..." : "댓글을 입력하세요..."}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}

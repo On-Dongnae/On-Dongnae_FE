@@ -117,6 +117,44 @@ export const newsService = {
     return true;
   },
 
+  updatePost: async (feedId: string, data: { type: 'feed' | 'gathering'; title?: string; content: string; images?: File[]; location?: string; schedule?: string }): Promise<boolean> => {
+    const formData = new FormData();
+    
+    let submitContent = data.content;
+    if (data.type === 'gathering') {
+      const loc = data.location ? `[모임 장소: ${data.location}]\n` : '';
+      const sched = data.schedule ? `[일정: ${data.schedule}]\n` : '';
+      submitContent = `${loc}${sched}\n${data.content}`.trim();
+    }
+
+    const requestDto = {
+      type: data.type === 'feed' ? 'ACTIVITY' : 'MEETING',
+      title: data.title || '',
+      content: submitContent
+    };
+
+    formData.append('request', new Blob([JSON.stringify(requestDto)], { type: 'application/json' }));
+    
+    if (data.images && data.images.length > 0) {
+      data.images.forEach(image => {
+        formData.append('addImages', image);
+      });
+    }
+
+    await api.put(`/api/feeds/${feedId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    return true;
+  },
+
+  deletePost: async (feedId: string): Promise<boolean> => {
+    await api.delete(`/api/feeds/${feedId}`);
+    return true;
+  },
+
   toggleLike: async (postId: string, currentLiked: boolean): Promise<boolean> => {
     if (currentLiked) {
       await api.post(`/api/feeds/${postId}/unlike`);
