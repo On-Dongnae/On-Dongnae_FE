@@ -11,31 +11,43 @@ const MissionVerifyPage = () => {
   const navigate = useNavigate();
   const missionTitle = searchParams.get('title') || '미션 인증';
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [imageScale, setImageScale] = useState(1);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    if (images.length + files.length > 3) {
+      toast.error('사진은 최대 3장까지만 업로드할 수 있습니다.');
+      return;
     }
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImages(prev => [...prev, { file, preview: reader.result as string }]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
-    if (!imagePreview) {
+    if (images.length === 0) {
       toast.error('인증 사진을 업로드해주세요.');
       return;
     }
     setSubmitting(true);
     try {
-      const res = await missionService.submitVerification(searchParams.get('id') || '', imageFile, description);
+      const imageFiles = images.map(img => img.file);
+      const res = await missionService.submitVerification(searchParams.get('id') || '', imageFiles, description);
       setResult(res);
       if (res.status === 'approved') toast.success(res.message);
     } catch {
@@ -87,26 +99,32 @@ const MissionVerifyPage = () => {
           <>
             {/* Upload */}
             <div className="mb-4">
-              <label className="text-sm font-medium mb-2 block">인증 사진</label>
-              {imagePreview ? (
-                <div className="space-y-2">
-                  <div className="relative rounded-xl overflow-hidden bg-muted">
-                    <img src={imagePreview} alt="preview" className="w-full h-48 object-cover transition-transform duration-200" style={{ transform: `scale(${imageScale})`, transformOrigin: 'center center' }} />
-                    <button onClick={() => { setImagePreview(null); setImageScale(1); }} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium block">인증 사진</label>
+                <span className="text-xs text-muted-foreground">{images.length}/3</span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative rounded-xl overflow-hidden bg-muted w-48 h-48 flex-shrink-0 snap-center">
+                    <img src={img.preview} alt="preview" className="w-full h-full object-cover transition-transform duration-200" style={{ transform: `scale(${imageScale})`, transformOrigin: 'center center' }} />
+                    <button onClick={() => removeImage(idx)} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
                   </div>
-                  <div className="flex items-center justify-center gap-3">
-                    <button onClick={() => setImageScale(s => Math.max(0.5, s - 0.25))} className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground active:bg-secondary/70 transition-colors"><ZoomOut size={16} strokeWidth={1.6} /></button>
-                    <button onClick={() => setImageScale(1)} className="text-[11px] text-muted-foreground font-medium px-2">{Math.round(imageScale * 100)}%</button>
-                    <button onClick={() => setImageScale(s => Math.min(3, s + 0.25))} className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground active:bg-secondary/70 transition-colors"><ZoomIn size={16} strokeWidth={1.6} /></button>
-                  </div>
+                ))}
+                {images.length < 3 && (
+                  <label className="flex flex-col items-center justify-center w-48 h-48 flex-shrink-0 snap-center rounded-xl border-2 border-dashed border-border bg-card cursor-pointer hover:border-primary/30 transition-colors">
+                    <Camera size={28} className="text-muted-foreground mb-2" strokeWidth={1.4} />
+                    <span className="text-sm text-muted-foreground">사진 추가</span>
+                    <span className="text-xs text-muted-foreground mt-1">최대 3장</span>
+                    <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+                  </label>
+                )}
+              </div>
+              {images.length > 0 && (
+                <div className="flex items-center justify-center gap-3 mt-2">
+                  <button onClick={() => setImageScale(s => Math.max(0.5, s - 0.25))} className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground active:bg-secondary/70 transition-colors"><ZoomOut size={16} strokeWidth={1.6} /></button>
+                  <button onClick={() => setImageScale(1)} className="text-[11px] text-muted-foreground font-medium px-2">{Math.round(imageScale * 100)}%</button>
+                  <button onClick={() => setImageScale(s => Math.min(3, s + 0.25))} className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground active:bg-secondary/70 transition-colors"><ZoomIn size={16} strokeWidth={1.6} /></button>
                 </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer hover:border-primary/30 transition-colors">
-                  <Camera size={28} className="text-muted-foreground mb-2" strokeWidth={1.4} />
-                  <span className="text-sm text-muted-foreground">사진을 업로드해주세요</span>
-                  <span className="text-xs text-muted-foreground mt-1">탭하여 촬영 또는 선택</span>
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                </label>
               )}
             </div>
 
@@ -133,7 +151,7 @@ const MissionVerifyPage = () => {
 
             <button
               onClick={handleSubmit}
-              disabled={submitting || !imagePreview}
+              disabled={submitting || images.length === 0}
               className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {submitting ? (

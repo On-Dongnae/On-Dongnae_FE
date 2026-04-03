@@ -42,11 +42,13 @@ export const missionService = {
     }
   },
 
-  submitVerification: async (userMissionId: string, image: File | null, description: string): Promise<VerificationResult> => {
+  submitVerification: async (userMissionId: string, images: File[], description: string): Promise<VerificationResult> => {
     const formData = new FormData();
     formData.append('userMissionId', userMissionId);
     if (description) formData.append('content', description);
-    if (image) formData.append('images', image);
+    if (images && images.length > 0) {
+      images.forEach(img => formData.append('images', img));
+    }
 
     const res = await api.post('/api/verifications', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
