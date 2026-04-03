@@ -83,7 +83,7 @@ export const newsService = {
     });
   },
 
-  createPost: async (data: { type: 'feed' | 'gathering'; title?: string; content: string; image?: File; location?: string; schedule?: string }): Promise<boolean> => {
+  createPost: async (data: { type: 'feed' | 'gathering'; title?: string; content: string; images?: File[]; location?: string; schedule?: string }): Promise<boolean> => {
     const formData = new FormData();
     
     let submitContent = data.content;
@@ -102,8 +102,10 @@ export const newsService = {
 
     formData.append('request', new Blob([JSON.stringify(requestDto)], { type: 'application/json' }));
     
-    if (data.image) {
-      formData.append('images', data.image);
+    if (data.images && data.images.length > 0) {
+      data.images.forEach(image => {
+        formData.append('images', image);
+      });
     }
 
     await api.post('/api/feeds', formData, {

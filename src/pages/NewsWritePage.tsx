@@ -14,23 +14,38 @@ const NewsWritePage = () => {
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
   const [schedule, setSchedule] = useState('');
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    if (imageFiles.length + files.length > 3) {
+      toast.error('사진은 최대 3장까지 첨부할 수 있습니다.');
+      return;
     }
+
+    const newFiles = [...imageFiles, ...files];
+    setImageFiles(newFiles);
+
+    const newPreviews = files.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(newPreviews).then(previews => {
+      setImagePreviews(prev => [...prev, ...previews]);
+    });
   };
 
-  const clearImage = () => {
-    setImagePreview(null);
-    setImageFile(null);
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -38,7 +53,7 @@ const NewsWritePage = () => {
     if (tab === 'gathering' && !title) { toast.error('제목을 입력해주세요.'); return; }
     setLoading(true);
     try {
-      await newsService.createPost({ type: tab, title, content, location, schedule, image: imageFile || undefined });
+      await newsService.createPost({ type: tab, title, content, location, schedule, images: imageFiles });
       toast.success('글이 등록되었습니다!');
       navigate('/news');
     } catch {
@@ -89,19 +104,26 @@ const NewsWritePage = () => {
 
         {/* Image */}
         <div>
-          <label className="text-sm font-medium mb-1.5 block">사진 <span className="text-muted-foreground font-normal">(선택)</span></label>
-          {imagePreview ? (
-            <div className="relative rounded-xl overflow-hidden">
-              <img src={imagePreview} alt="preview" className="w-full h-36 object-cover" />
-              <button onClick={clearImage} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
-            </div>
-          ) : (
-            <label className="flex items-center justify-center h-24 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer">
-              <Camera size={22} className="text-muted-foreground mr-2" strokeWidth={1.4} />
-              <span className="text-sm text-muted-foreground">사진 추가</span>
-              <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-            </label>
-          )}
+          <label className="text-sm font-medium mb-1.5 block">사진 <span className="text-muted-foreground font-normal">(선택, 최대 3장)</span></label>
+          <div className="flex flex-col gap-2">
+            {imagePreviews.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative rounded-xl overflow-hidden min-w-[124px] w-[124px] h-[124px] border border-border">
+                    <img src={preview} alt={`preview ${index}`} className="w-full h-full object-cover" />
+                    <button onClick={() => removeImage(index)} className="absolute top-1.5 right-1.5 bg-black/60 text-white rounded-full p-1 text-[10px] w-6 h-6 flex items-center justify-center backdrop-blur-sm z-10 transition-colors hover:bg-black/80">✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {imagePreviews.length < 3 && (
+              <label className="flex items-center justify-center h-24 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer hover:bg-accent/50 transition-colors">
+                <Camera size={22} className="text-muted-foreground mr-2" strokeWidth={1.4} />
+                <span className="text-sm text-muted-foreground">사진 추가 ({imagePreviews.length}/3)</span>
+                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+              </label>
+            )}
+          </div>
         </div>
 
         <button onClick={handleSubmit} disabled={loading} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 mt-2">
