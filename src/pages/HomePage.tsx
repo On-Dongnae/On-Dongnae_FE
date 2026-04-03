@@ -5,23 +5,29 @@ import AppLayout from '@/components/layout/AppLayout';
 import logoImg from '@/assets/logo.png';
 import { useAuthStore } from '@/store/useAuthStore';
 import { weatherService } from '@/services/weatherService';
+import { rankingService } from '@/services/rankingService';
 import { WeatherInfo, User } from '@/types';
-import { districtRankings } from '@/mocks/rankings';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
   const [weather, setWeather] = useState<WeatherInfo | null>(null);
+  const [districtTemp, setDistrictTemp] = useState<number>(0);
 
   useEffect(() => {
     if (user) {
       weatherService.getWeather(user.district).then(setWeather);
+      
+      rankingService.getDistrictRankings().then(rankings => {
+        const myDistrict = rankings.find(r => r.district === user.district);
+        if (myDistrict) {
+          setDistrictTemp(myDistrict.averageTemperature);
+        }
+      });
     }
   }, [user]);
 
   if (!user) return null;
-
-  const districtData = districtRankings.find(d => d.district === user.district);
 
   return (
     <AppLayout>
@@ -58,7 +64,7 @@ const HomePage = () => {
           <img src={logoImg} alt="온동네 로고" className="w-24 h-24 mb-3" />
           <p className="text-[16px] text-muted-foreground mb-1">{user.district} 실시간 온도</p>
           <div className="flex items-end gap-1 mb-2">
-            <span className="text-[48px] font-bold text-primary leading-none">{user.temperature}</span>
+            <span className="text-[48px] font-bold text-primary leading-none">{districtTemp}</span>
             <span className="text-[28px] font-bold text-primary mb-1">°C</span>
           </div>
           <p className="text-[14px] text-muted-foreground">따뜻한 마음이 모여 만드는 온도</p>
