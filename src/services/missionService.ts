@@ -17,8 +17,10 @@ const mapToMission = (u: any): Mission => ({
 export const missionService = {
   getDailyMissions: async (): Promise<Mission[]> => {
     try {
-      const res = await api.get('/api/users/me/missions?type=INITIAL');
-      return res.data.data.map(mapToMission);
+      const res = await api.get('/api/missions/today');
+      return res.data.data
+        .filter((u: any) => u.mission.type === 'INITIAL')
+        .map(mapToMission);
     } catch {
       return dailyMissions;
     }
@@ -26,13 +28,15 @@ export const missionService = {
 
   getHiddenMissions: async (): Promise<HiddenMission[]> => {
     try {
-      const res = await api.get('/api/users/me/missions?type=AI_HIDDEN');
-      return res.data.data.map((u: any) => ({
-        ...mapToMission(u),
-        reason: '지난 활동 내역을 기반으로 AI가 찾아냈어요',
-        verificationMethod: '사진 인증',
-        activityType: 'AI_HIDDEN'
-      }));
+      const res = await api.get('/api/missions/today');
+      return res.data.data
+        .filter((u: any) => u.mission.type === 'AI_HIDDEN')
+        .map((u: any) => ({
+          ...mapToMission(u),
+          reason: '지난 활동 내역을 기반으로 AI가 찾아냈어요',
+          verificationMethod: '사진 인증',
+          activityType: 'AI_HIDDEN'
+        }));
     } catch {
       return hiddenMissions;
     }
@@ -62,7 +66,7 @@ export const missionService = {
 
   pollVerificationStatus: async (userMissionId: string): Promise<VerificationResult> => {
     try {
-      const res = await api.get('/api/users/me/missions');
+      const res = await api.get('/api/missions/today');
       const mission = res.data.data.find((m: any) => String(m.id) === userMissionId);
       if (!mission) {
          return { status: 'review', message: '미션을 찾는 중...' };

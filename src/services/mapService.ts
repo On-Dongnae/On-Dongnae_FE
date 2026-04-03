@@ -1,4 +1,4 @@
-import { districtRankings } from "@/mocks/rankings";
+import { rankingService } from "./rankingService";
 import { seoulDistrictGrid, MockDistrictCell } from "@/mocks/seoulDistrictMap";
 import { buildDistrictScoreColorMap } from "@/lib/mapColors";
 
@@ -13,17 +13,17 @@ export interface DistrictMapDatum {
 
 export const mapService = {
   getDistrictMapData: async (): Promise<DistrictMapDatum[]> => {
-    await new Promise((r) => setTimeout(r, 300));
+    const rankings = await rankingService.getDistrictRankings();
 
-    const scoreData = districtRankings.map((d) => ({
+    const scoreData = rankings.map((d) => ({
       district: d.district,
-      score: 26 - d.rank, // 또는 실제 score 필드
+      score: d.averageTemperature, 
     }));
 
     const colorMap = buildDistrictScoreColorMap(scoreData);
 
     return seoulDistrictGrid.map((cell: MockDistrictCell) => {
-      const ranking = districtRankings.find(
+      const ranking = rankings.find(
         (d) => d.district === cell.district
       );
 
