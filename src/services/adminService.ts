@@ -156,9 +156,9 @@ export const adminService = {
       category: '-',
       difficulty: '보통',
       isActive: m.isActive,
-      type: (m.type === 'DAILY' ? 'daily' : 'hidden') as 'daily' | 'hidden',
+      type: (m.type as any === 'INITIAL' ? 'daily' : 'hidden') as 'daily' | 'hidden',
       verificationMethod: 'AI 사진 인증',
-      activityType: m.type === 'DAILY' ? '일일' : '히든',
+      activityType: m.type as any === 'INITIAL' ? '일일' : '히든',
     }));
   },
 
