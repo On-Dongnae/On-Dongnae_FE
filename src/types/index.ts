@@ -45,7 +45,7 @@ export interface FeedPost {
   authorNickname: string;
   authorDistrict: string;
   createdAt: string;
-  imageUrl: string;
+  imageUrls: string[];
   content: string;
   likes: number;
   comments: number;
@@ -63,6 +63,7 @@ export interface GatheringPost {
   likes: number;
   comments: number;
   liked: boolean;
+  imageUrls: string[];
   createdAt: string;
 }
 

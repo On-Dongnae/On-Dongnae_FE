@@ -15,15 +15,22 @@ const NewsWritePage = () => {
   const [location, setLocation] = useState('');
   const [schedule, setSchedule] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
+  };
+
+  const clearImage = () => {
+    setImagePreview(null);
+    setImageFile(null);
   };
 
   const handleSubmit = async () => {
@@ -31,7 +38,7 @@ const NewsWritePage = () => {
     if (tab === 'gathering' && !title) { toast.error('제목을 입력해주세요.'); return; }
     setLoading(true);
     try {
-      await newsService.createPost({ type: tab, title, content, location, schedule });
+      await newsService.createPost({ type: tab, title, content, location, schedule, image: imageFile || undefined });
       toast.success('글이 등록되었습니다!');
       navigate('/news');
     } catch {
@@ -86,7 +93,7 @@ const NewsWritePage = () => {
           {imagePreview ? (
             <div className="relative rounded-xl overflow-hidden">
               <img src={imagePreview} alt="preview" className="w-full h-36 object-cover" />
-              <button onClick={() => setImagePreview(null)} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
+              <button onClick={clearImage} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
             </div>
           ) : (
             <label className="flex items-center justify-center h-24 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer">
