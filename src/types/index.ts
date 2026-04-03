@@ -45,6 +45,7 @@ export interface FeedPost {
   authorId: string;
   authorNickname: string;
   authorDistrict: string;
+  title?: string;
   createdAt: string;
   imageUrls: string[];
   content: string;

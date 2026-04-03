@@ -52,6 +52,7 @@ export const newsService = {
       authorId: String(f.userId),
       authorNickname: generateNickname(f.userEmail),
       authorDistrict: '우리 동네', // 백엔드 부재 필드
+      title: f.title,
       createdAt: formatDate(f.createdAt),
       imageUrls: f.imageUrls || [],
       content: f.content || '',

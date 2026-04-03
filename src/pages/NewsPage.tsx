@@ -230,6 +230,9 @@ const NewsPage = () => {
                       </DropdownMenu>
                     )}
                   </div>
+                  {f.title && (
+                    <h3 className="text-[14px] font-semibold mb-1.5 text-foreground leading-tight">{f.title}</h3>
+                  )}
                   <p className="text-[13px] text-foreground leading-[1.6] mb-3 whitespace-pre-wrap">{f.content}</p>
                   <div className="flex items-center gap-4">
                     <button onClick={() => toggleLike(f.id, f.liked)} className={`flex items-center gap-1 text-[12px] ${f.liked ? 'text-accent' : 'text-muted-foreground'}`}>

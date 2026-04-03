@@ -117,7 +117,7 @@ export default function AdminFeedsPage() {
             <tr className="text-sm text-muted-foreground border-b border-border bg-muted/30">
               <th className="text-left px-4 py-3 font-medium">작성자</th>
               <th className="text-left px-4 py-3 font-medium">동네</th>
-              {tab === 'gathering' && <th className="text-left px-4 py-3 font-medium">제목</th>}
+              <th className="text-left px-4 py-3 font-medium">제목</th>
               <th className="text-left px-4 py-3 font-medium max-w-xs">내용</th>
               <th className="text-right px-4 py-3 font-medium">좋아요</th>
               <th className="text-right px-4 py-3 font-medium">댓글</th>
@@ -131,9 +131,7 @@ export default function AdminFeedsPage() {
               <tr key={feed.id} className="border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors text-sm">
                 <td className="px-4 py-3 font-medium text-foreground">{feed.authorNickname}</td>
                 <td className="px-4 py-3 text-muted-foreground">{feed.authorDistrict}</td>
-                {tab === 'gathering' && (
-                  <td className="px-4 py-3 text-foreground">{feed.title}</td>
-                )}
+                <td className="px-4 py-3 text-foreground">{feed.title || '-'}</td>
                 <td className="px-4 py-3 text-foreground max-w-xs truncate">{feed.content}</td>
                 <td className="px-4 py-3 text-right text-muted-foreground">{feed.likes}</td>
                 <td className="px-4 py-3 text-right text-muted-foreground">{feed.comments}</td>
