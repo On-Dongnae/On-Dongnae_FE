@@ -1,0 +1,91 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 30% 97%;
+    --foreground: 20 12% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 12% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 12% 18%;
+
+    --primary: 30 72% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 18% 93%;
+    --secondary-foreground: 20 10% 28%;
+
+    --muted: 30 10% 94%;
+    --muted-foreground: 20 6% 52%;
+
+    --accent: 12 60% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 60% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 12% 90%;
+    --input: 30 12% 90%;
+    --ring: 30 72% 50%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --warm-bg: 35 24% 95%;
+    --warm-card-shadow: 0px 1px 3px 0px hsla(20, 10%, 20%, 0.04), 0px 1px 2px -1px hsla(20, 10%, 20%, 0.04);
+    --tab-active: 30 72% 50%;
+    --tab-inactive: 20 6% 56%;
+    --success: 152 45% 42%;
+    --success-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Mobile app container */
+.app-container {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+  background: hsl(var(--background));
+}
+
+/* Hide scrollbar for cleaner app look */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe area for bottom tab */
+.pb-tab-safe {
+  padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 16px);
+}

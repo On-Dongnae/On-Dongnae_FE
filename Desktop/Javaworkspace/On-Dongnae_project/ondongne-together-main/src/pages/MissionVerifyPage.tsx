@@ -1,0 +1,130 @@
+import { useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Camera, Upload, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import PageHeader from '@/components/common/PageHeader';
+import { missionService } from '@/services/missionService';
+import { VerificationResult } from '@/types';
+import { toast } from 'sonner';
+
+const MissionVerifyPage = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const missionTitle = searchParams.get('title') || '미션 인증';
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<VerificationResult | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!imagePreview) {
+      toast.error('인증 사진을 업로드해주세요.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await missionService.submitVerification(searchParams.get('id') || '', null, description);
+      setResult(res);
+      if (res.status === 'approved') toast.success(res.message);
+    } catch {
+      toast.error('인증 제출에 실패했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const statusIcon = {
+    approved: <CheckCircle size={40} className="text-success" />,
+    review: <AlertCircle size={40} className="text-primary" />,
+    rejected: <XCircle size={40} className="text-destructive" />,
+  };
+
+  return (
+    <div className="app-container min-h-screen">
+      <PageHeader title="미션 인증" showBack />
+      <div className="px-5 py-4 animate-fade-in">
+        <div className="bg-primary/10 rounded-xl p-3.5 mb-5">
+          <p className="text-xs text-muted-foreground">현재 미션</p>
+          <p className="text-sm font-semibold text-foreground mt-0.5">{decodeURIComponent(missionTitle)}</p>
+        </div>
+
+        {!result ? (
+          <>
+            {/* Upload */}
+            <div className="mb-4">
+              <label className="text-sm font-medium mb-2 block">인증 사진</label>
+              {imagePreview ? (
+                <div className="relative rounded-xl overflow-hidden bg-muted">
+                  <img src={imagePreview} alt="preview" className="w-full h-48 object-cover" />
+                  <button onClick={() => setImagePreview(null)} className="absolute top-2 right-2 bg-foreground/50 text-primary-foreground rounded-full p-1 text-xs">✕</button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed border-border bg-card cursor-pointer hover:border-primary/30 transition-colors">
+                  <Camera size={28} className="text-muted-foreground mb-2" strokeWidth={1.4} />
+                  <span className="text-sm text-muted-foreground">사진을 업로드해주세요</span>
+                  <span className="text-xs text-muted-foreground mt-1">탭하여 촬영 또는 선택</span>
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                </label>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="mb-5">
+              <label className="text-sm font-medium mb-2 block">활동 설명 (선택)</label>
+              <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="어떤 활동을 했는지 간단히 설명해주세요."
+                rows={3}
+                className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <div className="bg-warm-bg rounded-lg p-3 mb-5 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">📋 인증 가이드</p>
+              <ul className="space-y-0.5 list-disc list-inside">
+                <li>활동 현장이 보이는 사진을 올려주세요</li>
+                <li>AI가 자동으로 사진을 검증합니다</li>
+                <li>부적절한 사진은 반려될 수 있습니다</li>
+              </ul>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || !imagePreview}
+              className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <><div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> 검증 중...</>
+              ) : (
+                <><Upload size={16} /> 인증 제출</>
+              )}
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            {statusIcon[result.status]}
+            <h2 className="text-lg font-bold mt-4">
+              {result.status === 'approved' ? '인증 완료!' : result.status === 'review' ? '검토 중' : '인증 반려'}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2">{result.message}</p>
+            <button onClick={() => navigate('/mission')} className="mt-6 h-10 px-6 rounded-lg bg-primary text-primary-foreground text-sm font-medium">
+              미션 목록으로
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default MissionVerifyPage;
