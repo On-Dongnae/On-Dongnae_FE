@@ -32,7 +32,7 @@ const MissionPage = () => {
   return (
     <AppLayout>
       <div className="pt-3">
-        <h1 className="text-[15px] font-bold px-5 mb-2">미션</h1>
+        <h1 className="text-[15px] font-bold px-5 mb-2 text-center">미션</h1>
         <TabSwitcher tabs={['일일 미션', '히든 미션']} activeTab={tab} onChange={setTab} />
 
         {loading ? <LoadingSpinner /> : (

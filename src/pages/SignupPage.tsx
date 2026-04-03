@@ -117,12 +117,12 @@ const SignupPage = () => {
             onChange={e => update('district', e.target.value)}
             className="w-full h-11 px-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none"
           >
-            <option value="">구를 선택해주세요</option>
+            <option value="">동네 선택</option>
             {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
 
-        <button onClick={handleSignup} disabled={loading} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 mt-4">
+        <button onClick={handleSignup} disabled={loading} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60 mt-8">
           {loading ? '가입 중...' : '가입 완료'}
         </button>
       </div>

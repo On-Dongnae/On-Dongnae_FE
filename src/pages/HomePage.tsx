@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, ChevronRight, Target, Sparkles, FileCheck, Newspaper } from 'lucide-react';
+import { ChevronRight, Target, Sparkles, FileCheck, Newspaper } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
 import { authService } from '@/services/authService';
 import { weatherService } from '@/services/weatherService';
@@ -36,14 +36,8 @@ const HomePage = () => {
   return (
     <AppLayout>
       <div className="px-5 pt-3 pb-2 animate-fade-in">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-1 text-[13px] text-muted-foreground">
-            <MapPin size={13} strokeWidth={1.6} />
-            <span className="font-medium text-foreground">{user.district}</span>
-          </div>
-          <span className="text-[15px] font-bold text-foreground tracking-tight">온동네</span>
-        </div>
+        {/* Spacer replacing old header */}
+        <div className="h-2" />
 
         {/* Weather + Temperature combined */}
         {weather && (
@@ -64,17 +58,17 @@ const HomePage = () => {
               <span className="text-[11px] text-muted-foreground mb-0.5 ml-1">내 온도</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-background rounded-lg py-2 text-center">
-                <p className="text-[10px] text-muted-foreground">개인</p>
-                <p className="text-[13px] font-bold mt-0.5">{user.rank}위</p>
+              <div className="bg-background rounded-lg py-2.5 text-center">
+                <p className="text-[11px] text-muted-foreground">개인</p>
+                <p className="text-[16px] font-bold mt-0.5">{user.rank}위</p>
               </div>
-              <div className="bg-background rounded-lg py-2 text-center">
-                <p className="text-[10px] text-muted-foreground">동네</p>
-                <p className="text-[13px] font-bold mt-0.5">{districtData?.rank || '-'}위</p>
+              <div className="bg-background rounded-lg py-2.5 text-center">
+                <p className="text-[11px] text-muted-foreground">동네</p>
+                <p className="text-[16px] font-bold mt-0.5">{districtData?.rank || '-'}위</p>
               </div>
-              <div className="bg-background rounded-lg py-2 text-center">
-                <p className="text-[10px] text-muted-foreground">동네 평균</p>
-                <p className="text-[13px] font-bold mt-0.5">{formatTemp(districtData?.averageTemperature || '-')}</p>
+              <div className="bg-background rounded-lg py-2.5 text-center">
+                <p className="text-[11px] text-muted-foreground">동네 평균</p>
+                <p className="text-[16px] font-bold mt-0.5">{formatTemp(districtData?.averageTemperature || '-')}</p>
               </div>
             </div>
           </div>
@@ -86,10 +80,10 @@ const HomePage = () => {
             <button
               key={s.label}
               onClick={() => navigate(s.path)}
-              className="bg-card rounded-xl py-3 px-1 shadow-card flex flex-col items-center gap-1.5 active:scale-[0.97] transition-transform"
+              className="bg-card rounded-xl py-4 px-1 shadow-card flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
             >
-              <s.icon size={18} className="text-primary" strokeWidth={1.5} />
-              <span className="text-[10px] font-medium text-foreground leading-tight">{s.label}</span>
+              <s.icon size={22} className="text-primary" strokeWidth={1.5} />
+              <span className="text-[11px] font-medium text-foreground leading-tight">{s.label}</span>
             </button>
           ))}
         </div>
@@ -97,7 +91,7 @@ const HomePage = () => {
         {/* Recommended Missions */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[13px] font-semibold">오늘의 추천 미션</h2>
+            <h2 className="text-[15px] font-bold">오늘의 추천 미션</h2>
             <button onClick={() => navigate('/mission')} className="text-[11px] text-muted-foreground flex items-center gap-0.5">
               더보기 <ChevronRight size={11} />
             </button>
@@ -107,13 +101,13 @@ const HomePage = () => {
               <button
                 key={m.id}
                 onClick={() => navigate('/mission')}
-                className="w-full bg-card rounded-xl p-3 shadow-card flex items-center justify-between text-left active:scale-[0.99] transition-transform"
+                className="w-full bg-card rounded-xl p-4 shadow-card flex items-center justify-between text-left active:scale-[0.99] transition-transform"
               >
                 <div className="min-w-0">
-                  <p className="text-[13px] font-medium">{m.title}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{m.description.slice(0, 30)}...</p>
+                  <p className="text-[14px] font-semibold">{m.title}</p>
+                  <p className="text-[12px] text-muted-foreground mt-1 truncate">{m.description.slice(0, 30)}...</p>
                 </div>
-                <span className="text-[12px] font-bold text-primary whitespace-nowrap ml-3">{formatTempDelta(m.points)}</span>
+                <span className="text-[14px] font-bold text-primary whitespace-nowrap ml-3">{formatTempDelta(m.points)}</span>
               </button>
             ))}
           </div>

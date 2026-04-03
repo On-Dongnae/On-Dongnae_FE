@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import TabSwitcher from '@/components/common/TabSwitcher';
 import SortButtons from '@/components/common/SortButtons';
@@ -13,7 +13,11 @@ import { Heart, MessageCircle, MapPin, Calendar, ImageIcon } from 'lucide-react'
 
 const NewsPage = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState(0);
+  const location = useLocation();
+  const { targetPostId, targetTab } = (location.state as { targetPostId?: string; targetTab?: number } || {});
+  const [tab, setTab] = useState(targetTab ?? 0);
+  const [highlightId, setHighlightId] = useState<string | null>(targetPostId ?? null);
+  
   const [sort, setSort] = useState<'latest' | 'popular'>('latest');
   const [feeds, setFeeds] = useState<FeedPost[]>([]);
   const [gatherings, setGatherings] = useState<GatheringPost[]>([]);
@@ -43,6 +47,20 @@ const NewsPage = () => {
       newsService.getGatheringPosts(sort).then(d => { setGatherings(d); setLoading(false); });
     }
   }, [tab, sort]);
+
+  // Scroll to target post when navigated from activity page
+  useEffect(() => {
+    if (!loading && targetPostId) {
+      setTimeout(() => {
+        const el = document.querySelector(`[data-post-id="${targetPostId}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Clear highlight after 2s
+        setTimeout(() => setHighlightId(null), 2000);
+      }, 100);
+    }
+  }, [loading, targetPostId]);
 
   const toggleLike = (id: string) => {
     if (tab === 0) {
@@ -76,14 +94,14 @@ const NewsPage = () => {
   return (
     <AppLayout>
       <div className="pt-3">
-        <h1 className="text-[15px] font-bold px-5 mb-2">소식</h1>
+        <h1 className="text-[15px] font-bold px-5 mb-2 text-center">소식</h1>
         <TabSwitcher tabs={['활동 기록', '동네 모임']} activeTab={tab} onChange={i => { setTab(i); setSort('latest'); }} />
         <SortButtons current={sort} onChange={setSort} />
 
         {loading ? <LoadingSpinner /> : (
           <div className="px-4 space-y-2.5 pb-4 animate-fade-in">
             {tab === 0 ? feeds.map(f => (
-              <div key={f.id} className="bg-card rounded-xl shadow-card overflow-hidden">
+              <div key={f.id} data-post-id={f.id} className={`bg-card rounded-xl shadow-card overflow-hidden transition-all duration-500 ${highlightId === f.id ? 'ring-2 ring-primary/40' : ''}`}>
                 {/* 사진 영역 */}
                 {f.imageUrl ? (
                   <img src={f.imageUrl} alt="활동 사진" className="w-full aspect-[3/2] object-cover" loading="lazy" />
@@ -112,7 +130,7 @@ const NewsPage = () => {
                 </div>
               </div>
             )) : gatherings.map(g => (
-              <div key={g.id} className="bg-card rounded-xl shadow-card p-3.5">
+              <div key={g.id} data-post-id={g.id} className={`bg-card rounded-xl shadow-card p-3.5 transition-all duration-500 ${highlightId === g.id ? 'ring-2 ring-primary/40' : ''}`}>
                 <h3 className="text-[13px] font-semibold mb-1.5">{g.title}</h3>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-6 h-6 rounded-full bg-primary/12 flex items-center justify-center text-[9px] font-bold text-primary">{g.authorNickname[0]}</div>

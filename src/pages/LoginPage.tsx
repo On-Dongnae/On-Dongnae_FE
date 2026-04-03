@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { toast } from 'sonner';
+import logoImg from '@/assets/logo.png';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -34,31 +35,28 @@ const LoginPage = () => {
     <div className="app-container flex flex-col items-center justify-center min-h-screen px-7">
       {/* Logo */}
       <div className="flex flex-col items-center mb-12">
-        <h1 className="text-[26px] font-bold text-foreground tracking-tight">온동네</h1>
-        <p className="text-[13px] text-muted-foreground mt-1.5">온라인으로 연결된 온기 있는 우리 동네</p>
+        <img src={logoImg} alt="온동네 로고" className="w-24 h-24 mb-2" />
+        <h1 className="text-[30px] font-bold text-foreground tracking-tight">온동네</h1>
+        <p className="text-[13px] text-muted-foreground mt-1.5">따듯한 마음이 모여 만드는 온도</p>
       </div>
 
       {/* Form */}
-      <div className="w-full max-w-sm space-y-3">
-        <div>
-          <label className="text-[12px] font-medium text-foreground mb-1.5 block">이메일</label>
+      <div className="w-full max-w-sm">
+        <div className="space-y-2">
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="example@email.com"
+            placeholder="이메일 주소"
             className="w-full h-11 px-3.5 rounded-lg border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1.5 focus:ring-primary/40 focus:border-primary/60 transition-colors"
           />
-        </div>
 
-        <div>
-          <label className="text-[12px] font-medium text-foreground mb-1.5 block">비밀번호</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="비밀번호를 입력하세요"
+              placeholder="비밀번호"
               className="w-full h-11 px-3.5 pr-10 rounded-lg border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1.5 focus:ring-primary/40 focus:border-primary/60 transition-colors"
             />
             <button
@@ -74,21 +72,19 @@ const LoginPage = () => {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-semibold text-[13px] active:bg-primary/85 transition-colors disabled:opacity-60 mt-1"
+          className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-semibold text-[13px] active:bg-primary/85 transition-colors disabled:opacity-60 mt-5"
         >
           {loading ? '로그인 중...' : '로그인'}
         </button>
 
-        <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground pt-1">
+        <div className="flex items-center justify-center gap-3 text-[13px] text-muted-foreground pt-3">
           <button className="active:text-foreground transition-colors">아이디 찾기</button>
           <span className="text-border">|</span>
           <button className="active:text-foreground transition-colors">비밀번호 찾기</button>
         </div>
 
-        <div className="flex items-center gap-3 py-1">
-          <div className="flex-1 h-px bg-border/70" />
-          <span className="text-[11px] text-muted-foreground">또는</span>
-          <div className="flex-1 h-px bg-border/70" />
+        <div className="py-2">
+          <div className="h-px bg-border/70" />
         </div>
 
         <button

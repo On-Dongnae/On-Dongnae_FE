@@ -5,7 +5,7 @@ export const dailyMissions: Mission[] = [
   { id: 'm2', title: '카페에서 텀블러 사용하기', description: '일회용 컵 대신 텀블러를 가져가 음료를 받아보세요.', points: 1, difficulty: '쉬움', estimatedTime: '5분', category: '환경', completed: false },
   { id: 'm3', title: '대중교통 이용하기', description: '버스나 지하철을 이용해서 이동해보세요.', points: 1, difficulty: '쉬움', estimatedTime: '30분', category: '교통', completed: true },
   { id: 'm4', title: '6000보 걷기', description: '건강도 챙기고 온도도 올리는 걷기 미션!', points: 1, difficulty: '보통', estimatedTime: '50분', category: '건강', completed: false },
-  { id: 'm5', title: '헌혈 인증', description: '생명을 나누는 따뜻한 활동, 헌혈에 참여해보세요.', points: 3, difficulty: '어려움', estimatedTime: '1시간', category: '봉사', completed: false },
+  { id: 'm5', title: '헌혈 인증', description: '생명을 나누는 따뜻한 활동, 헌혈에 참여해보세요.', points: 5, difficulty: '어려움', estimatedTime: '1시간', category: '봉사', completed: false },
 ];
 
 export const hiddenMissions: HiddenMission[] = [

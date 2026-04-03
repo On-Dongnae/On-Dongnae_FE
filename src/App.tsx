@@ -10,6 +10,7 @@ import MissionVerifyPage from "./pages/MissionVerifyPage";
 import NewsPage from "./pages/NewsPage";
 import NewsWritePage from "./pages/NewsWritePage";
 import RankingPage from "./pages/RankingPage";
+import RankingMapPage from "./pages/RankingMapPage";
 import MyPage from "./pages/MyPage";
 import ActivityPage from "./pages/ActivityPage";
 import RewardsPage from "./pages/RewardsPage";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/news" element={<NewsPage />} />
           <Route path="/news/write" element={<NewsWritePage />} />
           <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/ranking/map" element={<RankingMapPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/mypage/activity" element={<ActivityPage />} />
           <Route path="/mypage/rewards" element={<RewardsPage />} />

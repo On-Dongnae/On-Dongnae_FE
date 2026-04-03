@@ -1,6 +1,7 @@
 import { FeedPost, GatheringPost, NewsComment } from '@/types';
 import ploggingImg from '@/assets/news/plogging.jpg';
 import tumblerImg from '@/assets/news/tumbler-cafe.jpg';
+
 import stepCounterImg from '@/assets/news/step-counter.jpg';
 import bloodDonationImg from '@/assets/news/blood-donation.jpg';
 

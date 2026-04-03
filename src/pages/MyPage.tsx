@@ -27,7 +27,7 @@ const MyPage = () => {
   return (
     <AppLayout>
       <div className="pt-3 px-4 animate-fade-in">
-        <h1 className="text-[15px] font-bold px-1 mb-3">마이페이지</h1>
+        <h1 className="text-[15px] font-bold px-1 mb-3 text-center">마이페이지</h1>
 
         {/* Profile card */}
         <div className="bg-card rounded-2xl p-4 shadow-card mb-3">
