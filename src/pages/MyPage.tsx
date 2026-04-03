@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { authService } from '@/services/authService';
 import { districtRankings } from '@/mocks/rankings';
 import { formatTemp } from '@/lib/temperature';
-import { Award, Gift, FileText, ChevronRight, LogOut, User } from 'lucide-react';
+import { Award, Gift, FileText, ChevronRight, LogOut, User, Settings, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MyPage = () => {
@@ -22,6 +22,7 @@ const MyPage = () => {
     { icon: Award, label: '업적 / 배지', path: '/mypage/badges' },
     { icon: Gift, label: '보상함', path: '/mypage/rewards' },
     { icon: FileText, label: '활동 내역', path: '/mypage/activity' },
+    { icon: MapPin, label: '동네 설정', path: '/mypage' },
   ];
 
   return (
@@ -30,7 +31,15 @@ const MyPage = () => {
         <h1 className="text-[15px] font-bold px-1 mb-3 text-center">마이페이지</h1>
 
         {/* Profile card */}
-        <div className="bg-card rounded-2xl p-4 shadow-card mb-3">
+        <div className="bg-card rounded-2xl p-4 shadow-card mb-3 relative">
+          {/* Settings button */}
+          <button
+            onClick={() => toast.info('프로필 설정은 준비 중입니다.')}
+            className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-background flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Settings size={16} strokeWidth={1.5} />
+          </button>
+
           <div className="flex items-center gap-3 mb-3.5">
             <Avatar className="h-12 w-12">
               {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={user.nickname} /> : null}
@@ -52,13 +61,13 @@ const MyPage = () => {
               <p className="text-[10px] text-muted-foreground">누적 온도</p>
               <p className="text-[16px] font-bold text-foreground mt-0.5">{formatTemp(user.totalTemperature)}</p>
             </div>
-            <div className="bg-background rounded-lg py-2 text-center">
+            <div className="bg-background rounded-lg py-2.5 text-center">
               <p className="text-[10px] text-muted-foreground">개인 순위</p>
-              <p className="text-[13px] font-bold mt-0.5">{user.rank}위</p>
+              <p className="text-[16px] font-bold mt-0.5">{user.rank}위</p>
             </div>
-            <div className="bg-background rounded-lg py-2 text-center">
+            <div className="bg-background rounded-lg py-2.5 text-center">
               <p className="text-[10px] text-muted-foreground">동네 순위</p>
-              <p className="text-[13px] font-bold mt-0.5">{districtData?.rank || '-'}위</p>
+              <p className="text-[16px] font-bold mt-0.5">{districtData?.rank || '-'}위</p>
             </div>
           </div>
         </div>
@@ -68,7 +77,7 @@ const MyPage = () => {
           {menuItems.map((item, i) => (
             <button
               key={item.label}
-              onClick={() => navigate(item.path)}
+              onClick={() => item.path === '/mypage' ? toast.info('동네 설정은 준비 중입니다.') : navigate(item.path)}
               className={`w-full flex items-center justify-between px-4 py-3 active:bg-muted/40 transition-colors ${
                 i !== 0 ? 'border-t border-border/50' : ''
               }`}

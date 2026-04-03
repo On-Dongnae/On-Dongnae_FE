@@ -77,14 +77,10 @@ const LoginPage = () => {
           {loading ? '로그인 중...' : '로그인'}
         </button>
 
-        <div className="flex items-center justify-center gap-3 text-[13px] text-muted-foreground pt-3">
+        <div className="flex items-center justify-center gap-3 text-[13px] text-muted-foreground pt-3 pb-4">
           <button className="active:text-foreground transition-colors">아이디 찾기</button>
           <span className="text-border">|</span>
           <button className="active:text-foreground transition-colors">비밀번호 찾기</button>
-        </div>
-
-        <div className="py-2">
-          <div className="h-px bg-border/70" />
         </div>
 
         <button

@@ -100,7 +100,7 @@ const NewsPage = () => {
         <SortButtons current={sort} onChange={setSort} />
 
         {loading ? <LoadingSpinner /> : (
-          <div className="px-4 space-y-3.5 pb-4 animate-fade-in">
+          <div className="px-4 pt-2 space-y-4 pb-4 animate-fade-in">
             {tab === 0 ? feeds.map(f => (
               <div key={f.id} data-post-id={f.id} className={`bg-card rounded-xl shadow-card overflow-hidden transition-all duration-500 ${highlightId === f.id ? 'ring-2 ring-primary/40' : ''}`}>
                 {/* 사진 영역 */}
@@ -132,14 +132,14 @@ const NewsPage = () => {
               </div>
             )) : gatherings.map(g => (
               <div key={g.id} data-post-id={g.id} className={`bg-card rounded-xl shadow-card p-3.5 transition-all duration-500 ${highlightId === g.id ? 'ring-2 ring-primary/40' : ''}`}>
-                <h3 className="text-[13px] font-semibold mb-1.5">{g.title}</h3>
+                <h3 className="text-[15px] font-semibold mb-1.5">{g.title}</h3>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-6 h-6 rounded-full bg-primary/12 flex items-center justify-center text-[9px] font-bold text-primary">{g.authorNickname[0]}</div>
                   <span className="text-[11px] text-muted-foreground">{g.authorNickname} · {g.authorDistrict}</span>
                 </div>
                 <div className="space-y-1 mb-2">
-                  <p className="text-[11px] text-muted-foreground flex items-center gap-1"><MapPin size={11} strokeWidth={1.4} />{g.location}</p>
-                  <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Calendar size={11} strokeWidth={1.4} />{g.schedule}</p>
+                  <p className="text-[13px] text-foreground font-medium flex items-center gap-1"><MapPin size={13} strokeWidth={1.4} />{g.location}</p>
+                  <p className="text-[13px] text-foreground font-medium flex items-center gap-1"><Calendar size={13} strokeWidth={1.4} />{g.schedule}</p>
                 </div>
                 <p className="text-[12px] text-foreground leading-relaxed mb-2.5">{g.description}</p>
                 <div className="flex items-center gap-4">

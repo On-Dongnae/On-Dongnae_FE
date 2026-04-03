@@ -2,7 +2,7 @@ import { User } from '@/types';
 
 export const currentUser: User = {
   id: 'user-1',
-  email: 'test@ondongne.com',
+  email: 'winner@gmail.com',
   nickname: '따뜻한사람',
   district: '마포구',
   temperature: 28,
