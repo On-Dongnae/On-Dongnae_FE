@@ -1,18 +1,40 @@
-import { getHeatColor } from '@/lib/mapColors';
+const legendColors = [
+  "#FBE7CC",
+  "#F6D7A9",
+  "#E8B47B",
+  "#E29A50",
+  "#DB8024",
+  "#CB6A27",
+];
 
 const DistrictLegend = () => {
-  const steps = 6;
-  const colors = Array.from({ length: steps }, (_, i) => getHeatColor(i / (steps - 1)));
-
   return (
-    <div className="flex items-center gap-2 px-1">
-      <span className="text-[10px] text-muted-foreground shrink-0">낮음</span>
-      <div className="flex flex-1 h-3 rounded-full overflow-hidden">
-        {colors.map((c, i) => (
-          <div key={i} className="flex-1" style={{ backgroundColor: c }} />
+    <div className="flex items-center gap-3 px-1">
+      <span
+        className="text-[12px] font-medium"
+        style={{ color: "#8C8175" }}
+      >
+        낮음
+      </span>
+
+      <div className="flex-1 flex overflow-hidden rounded-full h-4 border"
+        style={{ borderColor: "#E9E6E2" }}
+      >
+        {legendColors.map((color) => (
+          <div
+            key={color}
+            className="flex-1"
+            style={{ backgroundColor: color }}
+          />
         ))}
       </div>
-      <span className="text-[10px] text-muted-foreground shrink-0">높음</span>
+
+      <span
+        className="text-[12px] font-medium"
+        style={{ color: "#8C8175" }}
+      >
+        높음
+      </span>
     </div>
   );
 };

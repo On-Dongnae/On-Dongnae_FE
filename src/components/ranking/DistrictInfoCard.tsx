@@ -11,17 +11,49 @@ const DistrictInfoCard = ({ data, isMyDistrict }: Props) => {
   if (!data) return null;
 
   return (
-    <div className={`rounded-xl px-4 py-3.5 ${isMyDistrict ? 'bg-primary/10 ring-1 ring-primary/30' : 'bg-card shadow-card'}`}>
+    <div
+      className="rounded-xl px-4 py-3.5"
+      style={{
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E9E6E2',
+      }}
+    >
       <div className="flex items-center gap-2 mb-1.5">
-        <MapPin size={14} className="text-primary" />
-        <span className="text-[13px] font-bold text-foreground">{data.district}</span>
+        <MapPin size={14} style={{ color: '#DB8024' }} />
+        <span
+          className="text-[13px] font-bold"
+          style={{ color: '#2F2A25' }}
+        >
+          {data.district}
+        </span>
+
         {isMyDistrict && (
-          <span className="text-[9px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-semibold">내 동네</span>
+          <span
+            className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+            style={{
+              backgroundColor: '#DB8024',
+              color: '#FFFFFF',
+            }}
+          >
+            내 동네
+          </span>
         )}
       </div>
+
       <div className="flex items-center justify-between">
-        <span className="text-[12px] text-muted-foreground">순위 <strong className="text-foreground">{data.rank}위</strong> / 25</span>
-        <span className="text-[15px] font-bold text-primary">{formatTemp(data.temperature)}</span>
+        <span
+          className="text-[12px]"
+          style={{ color: '#7A6F63' }}
+        >
+          순위 <strong style={{ color: '#2F2A25' }}>{data.rank}위</strong> / 25
+        </span>
+
+        <span
+          className="text-[15px] font-bold"
+          style={{ color: '#DB8024' }}
+        >
+          {formatTemp(data.temperature)}
+        </span>
       </div>
     </div>
   );
