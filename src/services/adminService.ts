@@ -117,9 +117,24 @@ export const adminService = {
 
   // ── 인증 관리 ──
   getVerifications: async (status?: string): Promise<AdminVerification[]> => {
-    const param = status && status !== 'all' ? `?status=${status.toUpperCase()}` : '?status=PENDING';
-    const res = await api.get<ApiRes<VerificationDto[]>>(`/api/admin/verifications${param}`);
-    return res.data.data.map(v => ({
+    const fetchStatus = async (s: string) => {
+      const res = await api.get<ApiRes<VerificationDto[]>>(`/api/admin/verifications?status=${s}`);
+      return res.data.data;
+    };
+
+    let data: VerificationDto[] = [];
+    if (!status || status === 'all') {
+      const [pending, approved, rejected] = await Promise.all([
+        fetchStatus('PENDING'),
+        fetchStatus('APPROVED'),
+        fetchStatus('REJECTED')
+      ]);
+      data = [...pending, ...approved, ...rejected];
+    } else {
+      data = await fetchStatus(status.toUpperCase());
+    }
+
+    return data.map(v => ({
       id: String(v.id),
       userNickname: `유저#${v.userMissionId}`,
       userDistrict: '-',
@@ -136,6 +151,7 @@ export const adminService = {
       submittedAt: v.verifiedAt ? formatDate(v.verifiedAt) : '-',
     }));
   },
+
 
   approveVerification: async (verificationId: string): Promise<void> => {
     await api.patch(`/api/admin/verifications/${verificationId}/approve`);

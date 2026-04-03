@@ -22,13 +22,12 @@ export default function AdminVerificationsPage() {
 
   const fetchVerifications = () => {
     setLoading(true);
-    const apiStatus = statusFilter === 'all' ? 'pending' : statusFilter;
-    adminService.getVerifications(apiStatus)
+    adminService.getVerifications('all')
       .then(setItems)
       .catch(() => toast.error('인증 목록을 불러오는데 실패했습니다.'))
       .finally(() => setLoading(false));
   };
-  useEffect(() => { fetchVerifications(); }, [statusFilter]);
+  useEffect(() => { fetchVerifications(); }, []);
 
   const stats = useMemo(() => {
     const total = items.length;
