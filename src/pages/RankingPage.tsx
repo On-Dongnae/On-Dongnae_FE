@@ -39,7 +39,7 @@ const RankingPage = () => {
 
         {loading ? <LoadingSpinner /> : (
           <div className="px-4 py-2.5 animate-fade-in">
-            {/* My highlight */}
+            {/* My highlight */} 
             {tab === 0 && myDistrict && (
               <div className="bg-primary/8 rounded-xl px-4 py-3.5 mb-3">
                 <p className="text-[10px] text-muted-foreground mb-1">내 동네</p>
@@ -57,12 +57,14 @@ const RankingPage = () => {
                 <p className="text-[10px] text-muted-foreground mb-1">내 순위</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-[24px] font-bold text-primary">{myPersonal.rank}위</span>
                     <Avatar className="h-8 w-8">
                       {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={user.nickname} /> : null}
                       <AvatarFallback className="bg-primary/15 text-primary text-xs font-bold">{user.nickname[0]}</AvatarFallback>
                     </Avatar>
-                    <span className="text-[20px] font-semibold text-foreground">{myPersonal.nickname}</span>
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="text-[24px] font-bold text-primary">{myPersonal.rank}위</span>
+                      <span className="text-[20px] font-semibold text-foreground">{myPersonal.nickname}</span>
+                    </div>
                   </div>
                   <span className="text-[13px] font-semibold text-primary">{formatTemp(myPersonal.temperature)}</span>
                 </div>

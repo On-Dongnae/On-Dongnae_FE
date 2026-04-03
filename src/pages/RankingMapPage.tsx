@@ -34,13 +34,14 @@ const RankingMapPage = () => {
           <p className="text-[12px] text-muted-foreground text-center">
             서울시 25개 구의 평균 온도를 한눈에 확인해보세요
           </p>
-
+        
           {/* 지도 */}
           <DistrictTemperatureMap
             data={data}
             selectedDistrict={selected}
             onSelect={setSelected}
           />
+          
 
           {/* 범례 */}
           <DistrictLegend />
