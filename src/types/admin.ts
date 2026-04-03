@@ -21,6 +21,7 @@ export interface AdminFeed {
   title?: string;
   content: string;
   imageUrl?: string;
+  imageUrls: string[];
   likes: number;
   comments: number;
   status: 'normal' | 'hidden' | 'review';

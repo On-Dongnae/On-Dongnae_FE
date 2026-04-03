@@ -49,6 +49,7 @@ export const newsService = {
     
     return res.data.data.map(f => ({
       id: String(f.id),
+      authorId: String(f.userId),
       authorNickname: generateNickname(f.userEmail),
       authorDistrict: '우리 동네', // 백엔드 부재 필드
       createdAt: formatDate(f.createdAt),
@@ -68,6 +69,7 @@ export const newsService = {
       const info = extractGatheringInfo(f.content || '');
       return {
         id: String(f.id),
+        authorId: String(f.userId),
         title: f.title || '제목 없음',
         authorNickname: generateNickname(f.userEmail),
         authorDistrict: '우리 동네', 

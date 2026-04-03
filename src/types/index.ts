@@ -42,6 +42,7 @@ export interface VerificationResult {
 
 export interface FeedPost {
   id: string;
+  authorId: string;
   authorNickname: string;
   authorDistrict: string;
   createdAt: string;
@@ -54,6 +55,7 @@ export interface FeedPost {
 
 export interface GatheringPost {
   id: string;
+  authorId: string;
   title: string;
   authorNickname: string;
   authorDistrict: string;
@@ -109,6 +111,7 @@ export interface ActivityRecord {
 export interface NewsComment {
   id: string;
   postId: string;
+  authorId: string;
   authorNickname: string;
   content: string;
   createdAt: string;

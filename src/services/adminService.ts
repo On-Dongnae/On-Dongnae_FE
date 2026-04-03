@@ -184,6 +184,7 @@ export const adminService = {
       title: f.title,
       content: f.content || '',
       imageUrl: f.imageUrls?.[0],
+      imageUrls: f.imageUrls || [],
       likes: f.likeCount || 0,
       comments: f.commentCount || 0,
       status: 'normal',

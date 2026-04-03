@@ -30,6 +30,7 @@ export const commentService = {
     return res.data.data.map(c => ({
       id: String(c.id),
       postId: String(c.feedId),
+      authorId: String(c.userId),
       authorNickname: generateNickname(c.userEmail),
       content: c.content,
       createdAt: formatDate(c.createdAt)
@@ -45,6 +46,7 @@ export const commentService = {
     return {
       id: String(c.id),
       postId: String(c.feedId),
+      authorId: String(c.userId),
       authorNickname: generateNickname(c.userEmail),
       content: c.content,
       createdAt: formatDate(c.createdAt)

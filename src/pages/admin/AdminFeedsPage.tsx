@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ImageIcon } from 'lucide-react';
 import StatusBadge from '@/components/admin/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { adminService } from '@/services/adminService';
@@ -50,8 +50,13 @@ export default function AdminFeedsPage() {
       await adminService.deleteFeed(id);
       toast.success('게시글이 삭제되었습니다.');
       fetchFeeds();
-    } catch {
-      toast.error('삭제에 실패했습니다.');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || '';
+      if (msg.includes('ACCESS_DENIED') || err?.response?.status === 403) {
+        toast.error('권한이 없습니다. 관리자 계정으로 해당 게시글을 삭제할 수 없습니다.');
+      } else {
+        toast.error(`삭제 실패: ${msg || '서버 오류'}`);
+      }
     }
   };
 
@@ -177,7 +182,22 @@ export default function AdminFeedsPage() {
               {selectedFeed.title && (
                 <h3 className="font-semibold text-foreground text-base">{selectedFeed.title}</h3>
               )}
-              <p className="text-foreground leading-relaxed">{selectedFeed.content}</p>
+              {/* Image Gallery */}
+              {selectedFeed.imageUrls && selectedFeed.imageUrls.length > 0 ? (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {selectedFeed.imageUrls.map((url, idx) => (
+                    <div key={idx} className="min-w-[160px] w-[160px] h-[120px] rounded-md overflow-hidden border border-border shrink-0">
+                      <img src={url} alt={`사진 ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-32 rounded-md bg-muted/50 border border-border flex items-center justify-center text-sm text-muted-foreground">
+                  <ImageIcon size={20} className="mr-2 opacity-40" />
+                  업로드된 이미지 없음
+                </div>
+              )}
+              <p className="text-foreground leading-relaxed whitespace-pre-wrap">{selectedFeed.content}</p>
               {selectedFeed.reported && (
                 <div className="p-3 rounded-md bg-admin-red-light text-sm">
                   <span className="font-medium text-admin-red">신고 사유:</span>{' '}

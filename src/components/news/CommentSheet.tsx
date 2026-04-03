@@ -25,7 +25,7 @@ const CommentSheet = ({ open, onOpenChange, postTitle, comments, onAddComment, o
   const [editId, setEditId] = useState<string | null>(null);
   const user = useAuthStore(state => state.user);
   
-  const currentUserNickname = user?.email ? user.email.split('@')[0] : '이웃';
+  const currentUserId = user?.id || '';
 
   const handleSubmit = () => {
     if (!input.trim()) return;
@@ -66,7 +66,7 @@ const CommentSheet = ({ open, onOpenChange, postTitle, comments, onAddComment, o
                       <span className="text-[12px] font-medium">{c.authorNickname}</span>
                       <span className="text-[10px] text-muted-foreground">{c.createdAt}</span>
                     </div>
-                    {c.authorNickname === currentUserNickname && (
+                    {c.authorId === currentUserId && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="text-muted-foreground hover:bg-muted p-1 rounded-full"><MoreVertical size={12} /></button>

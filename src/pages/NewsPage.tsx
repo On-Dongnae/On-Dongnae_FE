@@ -67,7 +67,7 @@ const NewsPage = () => {
   const [tab, setTab] = useState(targetTab ?? 0);
   const [highlightId, setHighlightId] = useState<string | null>(targetPostId ?? null);
   const user = useAuthStore(state => state.user);
-  const currentUserNickname = user?.email ? user.email.split('@')[0] : '이웃';
+  const currentUserId = user?.id || '';
   
   const [sort, setSort] = useState<'latest' | 'popular'>('latest');
   const [feeds, setFeeds] = useState<FeedPost[]>([]);
@@ -218,7 +218,7 @@ const NewsPage = () => {
                         <p className="text-[10px] text-muted-foreground">{f.authorDistrict} · {f.createdAt}</p>
                       </div>
                     </div>
-                    {f.authorNickname === currentUserNickname && (
+                    {f.authorId === currentUserId && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="text-muted-foreground hover:bg-muted p-1.5 rounded-full"><MoreHorizontal size={14} /></button>
@@ -247,7 +247,7 @@ const NewsPage = () => {
                 <div className="p-3.5">
                   <div className="flex items-start justify-between mb-1.5">
                     <h3 className="text-[15px] font-semibold">{g.title}</h3>
-                    {g.authorNickname === currentUserNickname && (
+                    {g.authorId === currentUserId && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="text-muted-foreground hover:bg-muted p-1.5 rounded-full -mt-1"><MoreHorizontal size={14} /></button>
