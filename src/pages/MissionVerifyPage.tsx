@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Camera, Upload, CheckCircle, AlertCircle, XCircle, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
@@ -13,6 +13,7 @@ const MissionVerifyPage = () => {
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [description, setDescription] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [imageScale, setImageScale] = useState(1);
@@ -20,6 +21,7 @@ const MissionVerifyPage = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
@@ -33,7 +35,7 @@ const MissionVerifyPage = () => {
     }
     setSubmitting(true);
     try {
-      const res = await missionService.submitVerification(searchParams.get('id') || '', null, description);
+      const res = await missionService.submitVerification(searchParams.get('id') || '', imageFile, description);
       setResult(res);
       if (res.status === 'approved') toast.success(res.message);
     } catch {
@@ -42,6 +44,29 @@ const MissionVerifyPage = () => {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (result && result.status === 'review') {
+      const missionId = searchParams.get('id');
+      if (missionId) {
+        interval = setInterval(async () => {
+          try {
+            const polledResult = await missionService.pollVerificationStatus(missionId);
+            if (polledResult.status !== 'review') {
+              setResult(polledResult);
+              clearInterval(interval);
+              if (polledResult.status === 'approved') toast.success(polledResult.message);
+              if (polledResult.status === 'rejected') toast.error(polledResult.message);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }, 3000); // 3초마다 폴링
+      }
+    }
+    return () => clearInterval(interval);
+  }, [result, searchParams]);
 
   const statusIcon = {
     approved: <CheckCircle size={40} className="text-success" />,

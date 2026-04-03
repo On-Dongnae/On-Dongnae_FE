@@ -1,26 +1,79 @@
 import { dailyMissions, hiddenMissions } from '@/mocks/missions';
 import { Mission, HiddenMission, VerificationResult } from '@/types';
 
-// TODO: 추후 백엔드 API 연결 예정
+import api from '@/lib/api';
+
+const mapToMission = (u: any): Mission => ({
+  id: String(u.id), 
+  title: u.mission.name,
+  description: u.mission.description,
+  points: u.mission.pointAmount,
+  difficulty: '보통', // BE에 없음
+  estimatedTime: '10분', // BE에 없음
+  category: '환경', // BE에 없음
+  completed: u.isAchieved,
+});
+
 export const missionService = {
   getDailyMissions: async (): Promise<Mission[]> => {
-    await new Promise(r => setTimeout(r, 400));
-    return dailyMissions;
+    try {
+      const res = await api.get('/api/users/me/missions?type=INITIAL');
+      return res.data.data.map(mapToMission);
+    } catch {
+      return dailyMissions;
+    }
   },
 
-  // TODO: 추후 FastAPI/LLM 기반 AI 추천으로 교체 예정
   getHiddenMissions: async (): Promise<HiddenMission[]> => {
-    await new Promise(r => setTimeout(r, 600));
-    return hiddenMissions;
+    try {
+      const res = await api.get('/api/users/me/missions?type=AI_HIDDEN');
+      return res.data.data.map((u: any) => ({
+        ...mapToMission(u),
+        reason: '지난 활동 내역을 기반으로 AI가 찾아냈어요',
+        verificationMethod: '사진 인증',
+        activityType: 'AI_HIDDEN'
+      }));
+    } catch {
+      return hiddenMissions;
+    }
   },
 
-  // TODO: 추후 S3 업로드 + AI 검증 API 연결 예정
-  submitVerification: async (_missionId: string, _image: File | null, _description: string): Promise<VerificationResult> => {
-    await new Promise(r => setTimeout(r, 1500));
-    const outcomes: VerificationResult[] = [
-      { status: 'approved', message: '인증이 승인되었습니다! 온도가 올랐어요 🎉' },
-      { status: 'review', message: '검토 중입니다. 잠시만 기다려주세요.' },
-    ];
-    return outcomes[Math.floor(Math.random() * outcomes.length)];
+  submitVerification: async (userMissionId: string, image: File | null, description: string): Promise<VerificationResult> => {
+    const formData = new FormData();
+    formData.append('userMissionId', userMissionId);
+    if (description) formData.append('content', description);
+    if (image) formData.append('images', image);
+
+    const res = await api.post('/api/verifications', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    
+    // BE 응답 status가 PENDING 계열인 경우 'review'로 매핑
+    const beStatus = res.data?.data?.status; 
+    let status: 'approved' | 'review' | 'rejected' = 'review';
+    if (beStatus === 'VERIFIED') status = 'approved';
+    if (beStatus === 'REJECTED') status = 'rejected';
+
+    return {
+      status,
+      message: status === 'approved' ? '인증이 완료되었습니다!' : '인증 대기 중입니다. 잠시만 기다려주세요.'
+    };
   },
+
+  pollVerificationStatus: async (userMissionId: string): Promise<VerificationResult> => {
+    try {
+      const res = await api.get('/api/users/me/missions');
+      const mission = res.data.data.find((m: any) => String(m.id) === userMissionId);
+      if (!mission) {
+         return { status: 'review', message: '미션을 찾는 중...' };
+      }
+      
+      if (mission.status === 'VERIFIED') return { status: 'approved', message: '인증이 승인되었습니다! 온도가 올랐어요 🎉' };
+      if (mission.status === 'REJECTED') return { status: 'rejected', message: '인증이 반려되었습니다. 다시 시도해주세요.' };
+      
+      return { status: 'review', message: '검토 중입니다. 잠시만 기다려주세요.' };
+    } catch {
+      return { status: 'review', message: '검토 중...' };
+    }
+  }
 };
